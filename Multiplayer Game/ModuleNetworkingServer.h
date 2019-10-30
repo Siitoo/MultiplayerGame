@@ -54,6 +54,8 @@ private:
 
 		uint32 nextExpectedInputSequenceNumber = 0;
 		InputController gamepad;
+
+		ReplicationManagerServer replication_server;
 	};
 
 	ClientProxy clientProxies[MAX_CLIENTS];
@@ -63,8 +65,6 @@ private:
 	ClientProxy * getClientProxy(const sockaddr_in &clientAddress);
 
 	void destroyClientProxy(ClientProxy * proxy);
-
-
 
 public:
 

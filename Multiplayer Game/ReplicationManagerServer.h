@@ -2,6 +2,7 @@
 #define _REPLICATIONMANAGERSERVER_
 
 enum class ReplicationAction {None, Create, Update, Destroy};
+struct ClientProxy;
 
 struct ReplicationCommand
 {
@@ -19,9 +20,16 @@ public:
 
 	void Write(OutputMemoryStream &packet);
 
+	void SetClientId(uint32 clientId);
+	uint32 GetClientId();
+
+	bool HasCommands();
+
 private:
 
 	std::vector<ReplicationCommand> commands;
+
+	uint32 clientId;
 
 };
 

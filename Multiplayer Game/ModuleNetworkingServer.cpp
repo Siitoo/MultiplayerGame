@@ -1,6 +1,6 @@
 #include "Networks.h"
 #include "ModuleNetworkingServer.h"
-
+#include "ReplicationManagerServer.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -138,6 +138,15 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 
 					// TODO(jesus): Notify the new client proxy's replication manager about the creation of this game object
+
+					for (int j = 0; j < MAX_CLIENTS; j++)
+					{
+						if (clientProxies[j].gameObject == gameObject)
+						{
+							clientProxies->replication_server.Create(proxy->gameObject->networkId);
+						}
+					}
+					
 				}
 
 				LOG("Message received: hello - from player %s", playerName.c_str());
@@ -200,6 +209,21 @@ void ModuleNetworkingServer::onUpdate()
 
 				// TODO(jesus): If the replication interval passed and the replication manager of this proxy
 				//              has pending data, write and send a replication packet to this client.
+
+				if (clientProxy.secondsSinceLastReplication >= PING_INTERVAL_SECONDS)
+				{
+					clientProxy.secondsSinceLastReplication = 0.0f;
+
+					if (clientProxy.replication_server.HasCommands())
+					{
+						clientProxy.replication_server.Write(packet);
+
+						sendPacket(packet, clientProxy.address);
+					}
+				}
+				else
+					clientProxy.secondsSinceLastReplication += Time.deltaTime;
+
 			}
 		}
 	}
@@ -218,6 +242,7 @@ void ModuleNetworkingServer::onConnectionReset(const sockaddr_in & fromAddress)
 			if (clientProxies[i].connected && proxy->clientId != clientProxies[i].clientId)
 			{
 				// TODO(jesus): Notify this proxy's replication manager about the destruction of this player's game object
+
 			}
 		}
 
@@ -317,6 +342,9 @@ GameObject * ModuleNetworkingServer::spawnPlayer(ClientProxy &clientProxy, uint8
 		clientProxy.gameObject->texture = App->modResources->spacecraft3;
 	}
 
+	//Sito
+	clientProxy.gameObject->tag = spaceshipType;
+
 	// Create collider
 	clientProxy.gameObject->collider = App->modCollision->addCollider(ColliderType::Player, clientProxy.gameObject);
 	clientProxy.gameObject->collider->isTrigger = true;
@@ -334,6 +362,7 @@ GameObject * ModuleNetworkingServer::spawnPlayer(ClientProxy &clientProxy, uint8
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the creation of this game object
+			
 		}
 	}
 

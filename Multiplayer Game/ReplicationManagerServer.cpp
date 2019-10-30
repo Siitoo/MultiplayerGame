@@ -6,7 +6,6 @@ void ReplicationManagerServer::Create(uint32 networkId)
 	ReplicationCommand command;
 	command.networkId = networkId;
 	command.action = ReplicationAction::Create;
-
 	commands.push_back(command);
 }
 
@@ -36,10 +35,7 @@ void ReplicationManagerServer::Destroy(uint32 networkId)
 
 void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 {
-
-	packet << ServerMessage::Replication;
-
-	for (std::vector<ReplicationCommand>::iterator it; it != commands.end(); ++it)
+	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
 	{
 		packet << it->networkId;
 		packet << it->action;
@@ -51,20 +47,24 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 
 		case ReplicationAction::Create:
 		{
-			packet << go->position;
+			packet << go->position.x;
+			packet << go->position.y;
 			//packet << go->pivot;
-			packet << go->size;
+			packet << go->size.x;
+			packet << go->size.y;
 			packet << go->angle;
-			packet << go->texture;
+			packet << go->tag;
+			//packet << go->texture;
 			//packet << go->order;
-			packet << go->collider;
-			packet << go->behaviour;
+			//packet << go->collider;
+			//packet << go->behaviour;
 			break;
 		}
 		
 		case ReplicationAction::Update:
 		{
-			packet << go->position;
+			packet << go->position.x;
+			packet << go->position.y;
 			packet << go->angle;
 
 			break;
@@ -75,3 +75,19 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 		it->action = ReplicationAction::None;
 	}
 }
+
+bool ReplicationManagerServer::HasCommands()
+{
+	return commands.size() > 0;
+}
+
+void ReplicationManagerServer::SetClientId(uint32 clientId)
+{
+	this->clientId = clientId;
+}
+
+uint32 ReplicationManagerServer::GetClientId()
+{
+	return clientId;
+}
+
