@@ -202,6 +202,12 @@ void ModuleNetworkingServer::onUpdate()
 		// Replication
 		for (ClientProxy &clientProxy : clientProxies)
 		{
+
+			if (Time.deltaTime - clientProxy.lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
+			{
+				NetworkDestroy(clientProxy.gameObject);
+			}
+
 			if (clientProxy.connected)
 			{
 				OutputMemoryStream packet;
