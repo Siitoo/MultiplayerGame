@@ -23,6 +23,11 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 
 		//instantiate and add it to the list
 
+
+		App->modGameObject->Instantiate();
+		App->modGameObject->goCount += 1;
+		App->modGameObject->AddGOtoArray(go);
+
 		break;
 
 	case ReplicationAction::Update:

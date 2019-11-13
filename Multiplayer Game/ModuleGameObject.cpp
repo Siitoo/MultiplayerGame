@@ -103,3 +103,9 @@ void Destroy(GameObject * gameObject)
 {
 	ModuleGameObject::Destroy(gameObject);
 }
+
+
+void ModuleGameObject::AddGOtoArray(GameObject go) {
+
+	gameObjects[goCount] = go;
+}
