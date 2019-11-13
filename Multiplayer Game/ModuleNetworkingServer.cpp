@@ -187,11 +187,11 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				}
 			}
 		}
-
-		if (proxy != nullptr)
+		else if (message == ClientMessage::Ping)
 		{
 			proxy->lastPacketReceivedTime = Time.time;
 		}
+
 	}
 }
 
@@ -199,39 +199,51 @@ void ModuleNetworkingServer::onUpdate()
 {
 	if (state == ServerState::Listening)
 	{
-		// Replication
-		for (ClientProxy &clientProxy : clientProxies)
+		//Ping Packet ServerToClient
+		if (secondsSinceLastPing > PING_INTERVAL_SECONDS)
 		{
+			secondsSinceLastPing = 0.0f;
+			OutputMemoryStream packet;
+			packet << ServerMessage::Ping;
 
-			if (Time.deltaTime - clientProxy.lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
+			for (ClientProxy &clientProxy : clientProxies)
 			{
-				NetworkDestroy(clientProxy.gameObject);
+				sendPacket(packet, clientProxy.address);
 			}
+		}
+		else
+			secondsSinceLastPing += Time.deltaTime;
 
-			if (clientProxy.connected)
+		// Replication
+		if (actualReplicationTime > replicationDeliveryIntervalSeconds)
+		{
+			actualReplicationTime = 0.0f;
+
+			for (ClientProxy &clientProxy : clientProxies)
 			{
 				OutputMemoryStream packet;
 				packet << ServerMessage::Replication;
 
-				// TODO(jesus): If the replication interval passed and the replication manager of this proxy
-				//              has pending data, write and send a replication packet to this client.
-
-				if (clientProxy.secondsSinceLastReplication >= PING_INTERVAL_SECONDS)
+				if (clientProxy.replication_server.HasCommands())
 				{
-					clientProxy.secondsSinceLastReplication = 0.0f;
+					clientProxy.replication_server.Write(packet);
 
-					if (clientProxy.replication_server.HasCommands())
-					{
-						clientProxy.replication_server.Write(packet);
-
-						sendPacket(packet, clientProxy.address);
-					}
+					sendPacket(packet, clientProxy.address);
 				}
-				else
-					clientProxy.secondsSinceLastReplication += Time.deltaTime;
-
 			}
 		}
+		else
+			actualReplicationTime += Time.deltaTime;
+
+		//Disconnect Client if don't sent Ping packets
+		for (ClientProxy &clientProxy : clientProxies)
+		{
+			if (Time.deltaTime - clientProxy.lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
+			{
+				NetworkDestroy(clientProxy.gameObject);
+			}
+		}
+
 	}
 }
 
