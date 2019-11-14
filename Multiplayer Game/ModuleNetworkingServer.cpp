@@ -224,9 +224,10 @@ void ModuleNetworkingServer::onUpdate()
 				// TODO(jesus): If the replication interval passed and the replication manager of this proxy
 				//              has pending data, write and send a replication packet to this client.
 
-				if (secondsSinceLastReplication > replicationDeliveryIntervalSeconds)
+				//QUESTION
+				if (clientProxy.secondsSinceLastReplication >= replicationDeliveryIntervalSeconds)
 				{
-					secondsSinceLastReplication = 0.0f;
+					clientProxy.secondsSinceLastReplication = 0.0f;
 
 					if (clientProxy.replication_server.HasCommands())
 					{
@@ -236,7 +237,7 @@ void ModuleNetworkingServer::onUpdate()
 
 				}
 				else
-					secondsSinceLastReplication += Time.deltaTime;
+					clientProxy.secondsSinceLastReplication += Time.deltaTime;
 			}
 		}
 
@@ -446,6 +447,7 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the update of this game object
+			clientProxies[i].replication_server.Update(gameObject->networkId);
 		}
 	}
 }

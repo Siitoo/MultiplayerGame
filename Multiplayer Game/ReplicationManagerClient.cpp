@@ -41,7 +41,7 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 		go->collider = App->modCollision->addCollider(ColliderType::Player, go);
 		go->behaviour = new Spaceship;
 		go->behaviour->gameObject = go;
-
+		App->modLinkingContext->registerNetworkGameObject(go);
 		break;
 	}
 	case ReplicationAction::Update:

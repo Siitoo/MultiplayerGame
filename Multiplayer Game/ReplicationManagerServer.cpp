@@ -11,7 +11,7 @@ void ReplicationManagerServer::Create(uint32 networkId)
 
 void ReplicationManagerServer::Update(uint32 networkId)
 {
-	for (std::vector<ReplicationCommand>::iterator it; it != commands.end(); ++it)
+	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
 	{
 		if ((*it).networkId == networkId)
 		{
@@ -23,7 +23,7 @@ void ReplicationManagerServer::Update(uint32 networkId)
 
 void ReplicationManagerServer::Destroy(uint32 networkId)
 {
-	for (std::vector<ReplicationCommand>::iterator it; it != commands.end(); ++it)
+	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
 	{
 		if (it->networkId == networkId)
 		{
@@ -73,9 +73,10 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 		}
 
 		}
+
+		it->action = ReplicationAction::None;
 	}
 
-	commands.clear();
 }
 
 bool ReplicationManagerServer::HasCommands()
