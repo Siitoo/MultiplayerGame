@@ -5,58 +5,61 @@
 
 void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 {
-	ReplicationCommand replication_packet;
-
-	packet >> replication_packet.networkId;
-	packet >> replication_packet.action;
-
-	switch (replication_packet.action)
+	while (packet.RemainingByteCount() > 0)
 	{
-	case ReplicationAction::Create:
-	{
-		GameObject* go = Instantiate();
+		ReplicationCommand replication_packet;
 
-		go->networkId = replication_packet.networkId;
+		packet >> replication_packet.networkId;
+		packet >> replication_packet.action;
 
-		packet >> go->position.x;
-		packet >> go->position.y;
-		packet >> go->size.x;
-		packet >> go->size.y;
-		packet >> go->angle;
-		packet >> go->tag;
-
-		if (go->tag == 0)
+		switch (replication_packet.action)
 		{
-			go->texture = App->modResources->spacecraft1;
-		}
-		else if (go->tag == 1)
+		case ReplicationAction::Create:
 		{
-			go->texture = App->modResources->spacecraft2;
+			GameObject* go = Instantiate();
+
+			go->networkId = replication_packet.networkId;
+
+			packet >> go->position.x;
+			packet >> go->position.y;
+			packet >> go->size.x;
+			packet >> go->size.y;
+			packet >> go->angle;
+			packet >> go->tag;
+
+			if (go->tag == 0)
+			{
+				go->texture = App->modResources->spacecraft1;
+			}
+			else if (go->tag == 1)
+			{
+				go->texture = App->modResources->spacecraft2;
+			}
+			else if (go->tag == 2)
+			{
+				go->texture = App->modResources->spacecraft3;
+			}
+
+			go->collider = App->modCollision->addCollider(ColliderType::Player, go);
+			go->behaviour = new Spaceship;
+			go->behaviour->gameObject = go;
+			App->modLinkingContext->registerNetworkGameObject(go);
+			break;
 		}
-		else if (go->tag == 2)
+		case ReplicationAction::Update:
 		{
-			go->texture = App->modResources->spacecraft3;
+
+			GameObject* go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
+
+			packet >> go->position.x;
+			packet >> go->position.y;
+			packet >> go->angle;
+			break;
 		}
-
-		go->collider = App->modCollision->addCollider(ColliderType::Player, go);
-		go->behaviour = new Spaceship;
-		go->behaviour->gameObject = go;
-		App->modLinkingContext->registerNetworkGameObject(go);
-		break;
-	}
-	case ReplicationAction::Update:
-	{
-
-		GameObject* go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
-
-		packet >> go->position.x;
-		packet >> go->position.y;
-		packet >> go->angle;
-		break;
-	}
-	case ReplicationAction::Destroy:
-	{
-		break;
-	}
+		case ReplicationAction::Destroy:
+		{
+			break;
+		}
+		}
 	}
 }

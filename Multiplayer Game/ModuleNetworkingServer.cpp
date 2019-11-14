@@ -137,13 +137,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 
 					// TODO(jesus): Notify the new client proxy's replication manager about the creation of this game object
-					for (int j = 0; j < MAX_CLIENTS; j++)
-					{
-						if (clientProxies[j].gameObject == gameObject)
-						{
-							clientProxies->replication_server.Create(proxy->gameObject->networkId);
-						}
-					}
+					proxy->replication_server.Create(gameObject->networkId);
 				}
 
 				LOG("Message received: hello - from player %s", playerName.c_str());
@@ -381,6 +375,8 @@ GameObject * ModuleNetworkingServer::spawnPlayer(ClientProxy &clientProxy, uint8
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the creation of this game object
+			if (clientProxies[i].gameObject->networkId != clientProxy.gameObject->networkId)
+				clientProxies[i].replication_server.Create(clientProxy.gameObject->networkId);
 		}
 	}
 
