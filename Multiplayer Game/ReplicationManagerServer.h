@@ -1,7 +1,7 @@
 #ifndef _REPLICATIONMANAGERSERVER_
 #define _REPLICATIONMANAGERSERVER_
 
-enum class ReplicationAction {None, Create, Update, Destroy};
+enum class ReplicationAction { None, Create, Update, Destroy };
 struct ClientProxy;
 
 struct ReplicationCommand
@@ -34,5 +34,6 @@ private:
 };
 
 #endif // !_REPLICATIONMANAGERSERVER_
+
 
 

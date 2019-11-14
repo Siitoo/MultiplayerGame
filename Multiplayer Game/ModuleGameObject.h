@@ -27,7 +27,7 @@ struct GameObject
 	State state = NON_EXISTING;
 
 	// Tag for custom usage
-	uint32 tag = 0;
+	uint8 tag = 0;
 	
 private:
 
@@ -42,8 +42,6 @@ class ModuleGameObject : public Module
 {
 public:
 
-	int goCount = 0;
-
 	// Virtual functions
 
 	bool init() override;
@@ -55,8 +53,6 @@ public:
 	bool postUpdate() override;
 
 	bool cleanUp() override;
-
-	void AddGOtoArray(GameObject go);
 
 	static GameObject * Instantiate();
 

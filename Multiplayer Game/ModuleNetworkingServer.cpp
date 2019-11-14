@@ -1,6 +1,6 @@
 #include "Networks.h"
 #include "ModuleNetworkingServer.h"
-#include "ReplicationManagerServer.h"
+
 
 
 //////////////////////////////////////////////////////////////////////
@@ -121,7 +121,6 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 
 				// Create new network object
 				spawnPlayer(*proxy, spaceshipType);
-
 				// Send welcome to the new player
 				OutputMemoryStream welcomePacket;
 				welcomePacket << ServerMessage::Welcome;
@@ -138,7 +137,6 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 
 					// TODO(jesus): Notify the new client proxy's replication manager about the creation of this game object
-
 					for (int j = 0; j < MAX_CLIENTS; j++)
 					{
 						if (clientProxies[j].gameObject == gameObject)
@@ -146,7 +144,6 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 							clientProxies->replication_server.Create(proxy->gameObject->networkId);
 						}
 					}
-					
 				}
 
 				LOG("Message received: hello - from player %s", playerName.c_str());
@@ -183,15 +180,17 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 						unpackInputControllerButtons(inputData.buttonBits, proxy->gamepad);
 						proxy->gameObject->behaviour->onInput(proxy->gamepad);
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
+						//proxy->replication_server.Update(proxy->gameObject->networkId);
 					}
 				}
+				
 			}
 		}
-		else if (message == ClientMessage::Ping)
+
+		if (proxy != nullptr)
 		{
 			proxy->lastPacketReceivedTime = Time.time;
 		}
-
 	}
 }
 
@@ -208,42 +207,48 @@ void ModuleNetworkingServer::onUpdate()
 
 			for (ClientProxy &clientProxy : clientProxies)
 			{
-				sendPacket(packet, clientProxy.address);
+				if (clientProxy.connected)
+					sendPacket(packet, clientProxy.address);
 			}
 		}
 		else
 			secondsSinceLastPing += Time.deltaTime;
 
 		// Replication
-		if (actualReplicationTime > replicationDeliveryIntervalSeconds)
+		for (ClientProxy &clientProxy : clientProxies)
 		{
-			actualReplicationTime = 0.0f;
-
-			for (ClientProxy &clientProxy : clientProxies)
+			if (clientProxy.connected)
 			{
 				OutputMemoryStream packet;
 				packet << ServerMessage::Replication;
 
-				if (clientProxy.replication_server.HasCommands())
-				{
-					clientProxy.replication_server.Write(packet);
+				// TODO(jesus): If the replication interval passed and the replication manager of this proxy
+				//              has pending data, write and send a replication packet to this client.
 
-					sendPacket(packet, clientProxy.address);
+				if (secondsSinceLastReplication > replicationDeliveryIntervalSeconds)
+				{
+					secondsSinceLastReplication = 0.0f;
+
+					if (clientProxy.replication_server.HasCommands())
+					{
+						clientProxy.replication_server.Write(packet);
+						sendPacket(packet, clientProxy.address);
+					}
+
 				}
+				else
+					secondsSinceLastReplication += Time.deltaTime;
 			}
 		}
-		else
-			actualReplicationTime += Time.deltaTime;
 
-		//Disconnect Client if don't sent Ping packets
 		for (ClientProxy &clientProxy : clientProxies)
 		{
-			if (Time.deltaTime - clientProxy.lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
+			if (Time.time - clientProxy.lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
 			{
-				NetworkDestroy(clientProxy.gameObject);
+				if (clientProxy.connected)
+					NetworkDestroy(clientProxy.gameObject);
 			}
 		}
-
 	}
 }
 
@@ -260,7 +265,6 @@ void ModuleNetworkingServer::onConnectionReset(const sockaddr_in & fromAddress)
 			if (clientProxies[i].connected && proxy->clientId != clientProxies[i].clientId)
 			{
 				// TODO(jesus): Notify this proxy's replication manager about the destruction of this player's game object
-				clientProxies[i].replication_server.Destroy(proxy->gameObject->networkId);
 			}
 		}
 
@@ -359,10 +363,7 @@ GameObject * ModuleNetworkingServer::spawnPlayer(ClientProxy &clientProxy, uint8
 	else {
 		clientProxy.gameObject->texture = App->modResources->spacecraft3;
 	}
-
-	//Sito
 	clientProxy.gameObject->tag = spaceshipType;
-
 	// Create collider
 	clientProxy.gameObject->collider = App->modCollision->addCollider(ColliderType::Player, clientProxy.gameObject);
 	clientProxy.gameObject->collider->isTrigger = true;
@@ -380,7 +381,6 @@ GameObject * ModuleNetworkingServer::spawnPlayer(ClientProxy &clientProxy, uint8
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the creation of this game object
-			clientProxies[i].replication_server.Create(clientProxy.gameObject->networkId);
 		}
 	}
 
@@ -410,7 +410,6 @@ GameObject * ModuleNetworkingServer::spawnBullet(GameObject *parent)
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the creation of this game object
-			clientProxies[i].replication_server.Create(gameObject->networkId);
 		}
 	}
 
@@ -430,7 +429,6 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the destruction of this game object
-			clientProxies[i].replication_server.Destroy(gameObject->networkId);
 		}
 	}
 
@@ -449,7 +447,6 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the update of this game object
-			clientProxies[i].replication_server.Update(gameObject->networkId);
 		}
 	}
 }

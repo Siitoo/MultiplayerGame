@@ -128,6 +128,14 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 	else if (state == ClientState::Playing)
 	{
 		// TODO(jesus): Handle incoming messages from server
+		if (message == ServerMessage::Ping)
+		{
+			lastPacketReceivedTime = Time.time;
+		}
+		else if (message == ServerMessage::Replication)
+		{
+			replicationClient.Read(packet);
+		}
 	}
 }
 
@@ -153,6 +161,16 @@ void ModuleNetworkingClient::onUpdate()
 	}
 	else if (state == ClientState::Playing)
 	{
+		if (secondsSinceLastPing > PING_INTERVAL_SECONDS)
+		{
+			secondsSinceLastPing = 0.0f;
+			OutputMemoryStream packet;
+			packet << ClientMessage::Ping;
+			sendPacket(packet, serverAddress);
+		}
+		else
+			secondsSinceLastPing += Time.deltaTime;
+
 		secondsSinceLastInputDelivery += Time.deltaTime;
 
 		if (inputDataBack - inputDataFront < ArrayCount(inputData))
@@ -194,6 +212,11 @@ void ModuleNetworkingClient::onUpdate()
 	if (playerGameObject != nullptr)
 	{
 		App->modRender->cameraPosition = playerGameObject->position;
+	}
+
+	if (lastPacketReceivedTime < Time.time - DISCONNECT_TIMEOUT_SECONDS)
+	{
+		disconnect();
 	}
 }
 

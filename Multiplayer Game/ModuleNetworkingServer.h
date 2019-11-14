@@ -66,6 +66,8 @@ private:
 
 	void destroyClientProxy(ClientProxy * proxy);
 
+
+
 public:
 
 	//////////////////////////////////////////////////////////////////////
@@ -111,7 +113,9 @@ private:
 	float secondsSinceLastPing = 0.0f;
 	
 	float replicationDeliveryIntervalSeconds = 0.1f;
-	float actualReplicationTime = 0.0f;
+
+	//Sito
+	float secondsSinceLastReplication = 0.0f;
 };
 
 

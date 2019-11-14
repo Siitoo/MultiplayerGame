@@ -1,48 +1,62 @@
 #include "Networks.h"
+
 #include "ReplicationManagerServer.h"
-#include "ModuleGameObject.h"
+
 
 void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 {
 	ReplicationCommand replication_packet;
-	
+
 	packet >> replication_packet.networkId;
 	packet >> replication_packet.action;
 
 	switch (replication_packet.action)
 	{
 	case ReplicationAction::Create:
+	{
+		GameObject* go = Instantiate();
 
-		GameObject go;
-		packet >> go.position.x;
-		packet >> go.position.y;
-		packet >> go.size.x;
-		packet >> go.size.y;
-		packet >> go.angle;
-		packet >> go.tag;
+		go->networkId = replication_packet.networkId;
 
-		//instantiate and add it to the list
+		packet >> go->position.x;
+		packet >> go->position.y;
+		packet >> go->size.x;
+		packet >> go->size.y;
+		packet >> go->angle;
+		packet >> go->tag;
 
+		if (go->tag == 0)
+		{
+			go->texture = App->modResources->spacecraft1;
+		}
+		else if (go->tag == 1)
+		{
+			go->texture = App->modResources->spacecraft2;
+		}
+		else if (go->tag == 2)
+		{
+			go->texture = App->modResources->spacecraft3;
+		}
 
-		App->modGameObject->Instantiate();
-		App->modGameObject->goCount += 1;
-		App->modGameObject->AddGOtoArray(go);
+		go->collider = App->modCollision->addCollider(ColliderType::Player, go);
+		go->behaviour = new Spaceship;
+		go->behaviour->gameObject = go;
 
 		break;
-
+	}
 	case ReplicationAction::Update:
+	{
 
-		packet >> go.position.x;
-		packet >> go.position.y;
-		packet >> go.angle;
+		GameObject* go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
 
-
-
+		packet >> go->position.x;
+		packet >> go->position.y;
+		packet >> go->angle;
 		break;
-
+	}
 	case ReplicationAction::Destroy:
-
+	{
 		break;
-
-	
+	}
+	}
 }

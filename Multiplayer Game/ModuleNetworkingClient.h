@@ -75,10 +75,11 @@ private:
 	float inputDeliveryIntervalSeconds = 0.05f;
 	float secondsSinceLastInputDelivery = 0.0f;
 
-
 	// Timeout / ping
 
 	double lastPacketReceivedTime = 0.0f; // NOTE(jesus): Use this to implement client timeout
 	float secondsSinceLastPing = 0.0f;    // NOTE(jesus): Use this to implement ping to server
+
+	ReplicationManagerClient replicationClient;
 };
 

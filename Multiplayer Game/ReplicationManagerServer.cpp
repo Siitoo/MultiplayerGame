@@ -47,6 +47,7 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 
 		case ReplicationAction::Create:
 		{
+
 			packet << go->position.x;
 			packet << go->position.y;
 			//packet << go->pivot;
@@ -60,20 +61,21 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 			//packet << go->behaviour;
 			break;
 		}
-		
+
 		case ReplicationAction::Update:
 		{
+
 			packet << go->position.x;
 			packet << go->position.y;
 			packet << go->angle;
-
+			
 			break;
 		}
 
 		}
-
-		it->action = ReplicationAction::None;
 	}
+
+	commands.clear();
 }
 
 bool ReplicationManagerServer::HasCommands()
