@@ -410,6 +410,7 @@ GameObject * ModuleNetworkingServer::spawnBullet(GameObject *parent)
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the creation of this game object
+			clientProxies[i].replication_server.Create(gameObject->networkId);
 		}
 	}
 
@@ -429,6 +430,7 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the destruction of this game object
+			clientProxies[i].replication_server.Destroy(gameObject->networkId);
 		}
 	}
 
