@@ -392,7 +392,7 @@ GameObject * ModuleNetworkingServer::spawnBullet(GameObject *parent)
 	gameObject->position = parent->position;
 	gameObject->texture = App->modResources->laser;
 	gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
-
+	gameObject->tag = 3;
 	// Create behaviour
 	gameObject->behaviour = new Laser;
 	gameObject->behaviour->gameObject = gameObject;

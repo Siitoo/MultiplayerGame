@@ -15,7 +15,9 @@ void ReplicationManagerServer::Update(uint32 networkId)
 	{
 		if ((*it).networkId == networkId)
 		{
-			(*it).action = ReplicationAction::Update;
+			if((*it).action != ReplicationAction::Create)
+				(*it).action = ReplicationAction::Update;
+
 			break;
 		}
 	}
@@ -81,7 +83,14 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 
 bool ReplicationManagerServer::HasCommands()
 {
-	return commands.size() > 0;
+	for (int i = 0; i < commands.size(); ++i)
+	{
+		if (commands[i].action != ReplicationAction::None)
+			return true;
+	}
+
+
+	return false;
 }
 
 void ReplicationManagerServer::SetClientId(uint32 clientId)

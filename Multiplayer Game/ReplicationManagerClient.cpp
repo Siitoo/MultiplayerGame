@@ -39,9 +39,19 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 			{
 				go->texture = App->modResources->spacecraft3;
 			}
+			else
+				go->texture = App->modResources->laser;
 
-			go->collider = App->modCollision->addCollider(ColliderType::Player, go);
-			go->behaviour = new Spaceship;
+			if (go->tag != 3)
+			{
+				go->collider = App->modCollision->addCollider(ColliderType::Player, go);
+				go->behaviour = new Spaceship;
+			}
+			else
+			{
+				go->collider = App->modCollision->addCollider(ColliderType::Laser, go);
+				go->behaviour = new Laser;
+			}
 			go->behaviour->gameObject = go;
 			App->modLinkingContext->registerNetworkGameObject(go);
 			break;
@@ -51,9 +61,14 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
 
-			packet >> go->position.x;
-			packet >> go->position.y;
-			packet >> go->angle;
+			//Sito this is for laser and crash, well
+			if (go != nullptr)
+			{
+				packet >> go->position.x;
+				packet >> go->position.y;
+				packet >> go->angle;
+			}
+
 			break;
 		}
 		case ReplicationAction::Destroy:
