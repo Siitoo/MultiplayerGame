@@ -57,6 +57,7 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 			packet << go->size.y;
 			packet << go->angle;
 			packet << go->tag;
+			packet << go->parent_tag;
 			//packet << go->texture;
 			//packet << go->order;
 			//packet << go->collider;

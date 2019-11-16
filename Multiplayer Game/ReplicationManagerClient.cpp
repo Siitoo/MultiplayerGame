@@ -52,6 +52,8 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 				go->collider = App->modCollision->addCollider(ColliderType::Laser, go);
 				go->behaviour = new Laser;
 			}
+			packet >> go->parent_tag;
+
 			go->behaviour->gameObject = go;
 			App->modLinkingContext->registerNetworkGameObject(go);
 			break;
