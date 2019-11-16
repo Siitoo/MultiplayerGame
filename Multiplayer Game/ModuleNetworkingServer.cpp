@@ -259,6 +259,7 @@ void ModuleNetworkingServer::onConnectionReset(const sockaddr_in & fromAddress)
 			if (clientProxies[i].connected && proxy->clientId != clientProxies[i].clientId)
 			{
 				// TODO(jesus): Notify this proxy's replication manager about the destruction of this player's game object
+				clientProxies[i].replication_server.Destroy(proxy->gameObject->networkId);
 			}
 		}
 
@@ -393,10 +394,11 @@ GameObject * ModuleNetworkingServer::spawnBullet(GameObject *parent)
 	gameObject->texture = App->modResources->laser;
 	gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
 	gameObject->tag = 3;
+	gameObject->parent_tag = parent->tag;
 	// Create behaviour
 	gameObject->behaviour = new Laser;
 	gameObject->behaviour->gameObject = gameObject;
-
+	gameObject->behaviour->DoUpdate();
 	// Assign a new network identity to the object
 	App->modLinkingContext->registerNetworkGameObject(gameObject);
 

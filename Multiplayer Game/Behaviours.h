@@ -11,6 +11,8 @@ struct Behaviour
 	virtual void onInput(const InputController &input) { }
 
 	virtual void onCollisionTriggered(Collider &c1, Collider &c2) { }
+
+	virtual void DoUpdate() { }
 };
 
 struct Spaceship : public Behaviour
@@ -39,13 +41,13 @@ struct Spaceship : public Behaviour
 		if (input.actionLeft == ButtonState::Press)
 		{
 			GameObject * laser = App->modNetServer->spawnBullet(gameObject);
-			laser->tag = gameObject->tag;
+			//laser->tag = gameObject->tag;
 		}
 	}
 
 	void onCollisionTriggered(Collider &c1, Collider &c2) override
 	{
-		if (c2.type == ColliderType::Laser && c2.gameObject->tag != gameObject->tag)
+		if (c2.type == ColliderType::Laser && c2.gameObject->parent_tag != gameObject->tag)
 		{
 			NetworkDestroy(c2.gameObject); // Destroy the laser
 
@@ -61,16 +63,26 @@ struct Laser : public Behaviour
 {
 	float secondsSinceCreation = 0.0f;
 
+	bool do_update = false;
+
+	void DoUpdate()
+	{
+		do_update = true;
+	}
+
 	void update() override
 	{
-		const float pixelsPerSecond = 1000.0f;
-		gameObject->position += vec2FromDegrees(gameObject->angle) * pixelsPerSecond * Time.deltaTime;
+		if (do_update)
+		{
+			const float pixelsPerSecond = 1000.0f;
+			gameObject->position += vec2FromDegrees(gameObject->angle) * pixelsPerSecond * Time.deltaTime;
 
-		secondsSinceCreation += Time.deltaTime;
+			secondsSinceCreation += Time.deltaTime;
 
-		NetworkUpdate(gameObject);
+			NetworkUpdate(gameObject);
 
-		const float lifetimeSeconds = 2.0f;
-		if (secondsSinceCreation > lifetimeSeconds) NetworkDestroy(gameObject);
+			const float lifetimeSeconds = 2.0f;
+			if (secondsSinceCreation > lifetimeSeconds) NetworkDestroy(gameObject);
+		}
 	}
 };

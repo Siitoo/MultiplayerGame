@@ -28,7 +28,7 @@ struct GameObject
 
 	// Tag for custom usage
 	uint8 tag = 0;
-	
+	uint8 parent_tag = 100000;
 private:
 
 	void * operator new(size_t size) = delete;

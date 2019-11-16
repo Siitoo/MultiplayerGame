@@ -42,7 +42,7 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 			else
 				go->texture = App->modResources->laser;
 
-			if (go->tag != 3)
+			if (go->tag < 3)
 			{
 				go->collider = App->modCollision->addCollider(ColliderType::Player, go);
 				go->behaviour = new Spaceship;
@@ -73,6 +73,10 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 		}
 		case ReplicationAction::Destroy:
 		{
+			GameObject* go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
+			App->modLinkingContext->unregisterNetworkGameObject(go);
+			Destroy(go);
+
 			break;
 		}
 		}
