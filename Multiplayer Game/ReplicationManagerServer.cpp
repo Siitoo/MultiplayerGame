@@ -35,6 +35,18 @@ void ReplicationManagerServer::Destroy(uint32 networkId)
 	}
 }
 
+void ReplicationManagerServer::InputNumber(uint32 networkId )
+{
+	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
+	{
+		if (it->networkId == networkId)
+		{
+			it->input = true;
+			break;
+		}
+	}
+}
+
 void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 {
 	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
@@ -43,6 +55,8 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 		packet << it->action;
 
 		GameObject* go = App->modLinkingContext->getNetworkGameObject(it->networkId);
+
+		
 
 		switch (it->action)
 		{
@@ -74,7 +88,13 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 			
 			break;
 		}
+		}
 
+		packet << it->input;
+		if (it->input)
+		{
+			packet << App->modNetServer->GetLastInputSequenceNumberById(it->networkId);
+			it->input = false;
 		}
 
 		it->action = ReplicationAction::None;
@@ -86,7 +106,7 @@ bool ReplicationManagerServer::HasCommands()
 {
 	for (int i = 0; i < commands.size(); ++i)
 	{
-		if (commands[i].action != ReplicationAction::None)
+		if (commands[i].action != ReplicationAction::None || commands[i].input)
 			return true;
 	}
 

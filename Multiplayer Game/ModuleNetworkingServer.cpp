@@ -177,6 +177,8 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					}
 				}
 				
+				proxy->replication_server.InputNumber(proxy->gameObject->networkId);
+
 			}
 		}
 
@@ -469,4 +471,22 @@ void NetworkDestroy(GameObject * gameObject)
 	ASSERT(App->modNetServer->isConnected());
 
 	App->modNetServer->destroyNetworkObject(gameObject);
+}
+
+uint32 ModuleNetworkingServer::GetLastInputSequenceNumberById(uint32 networkId)
+{
+	uint32 ret = 0;
+
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (clientProxies[i].connected)
+		{
+			if (clientProxies[i].gameObject->networkId == networkId)
+			{
+				ret = clientProxies[i].nextExpectedInputSequenceNumber;
+			}
+		}
+	}
+
+	return ret - 1;
 }

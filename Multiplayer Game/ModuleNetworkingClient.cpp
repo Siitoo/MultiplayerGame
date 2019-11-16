@@ -199,8 +199,9 @@ void ModuleNetworkingClient::onUpdate()
 					packet << inputPacketData.buttonBits;
 				}
 
+				//Delete this for save all inputs
 				// Clear the queue
-				inputDataFront = inputDataBack;
+				//inputDataFront = inputDataBack;
 
 				sendPacket(packet, serverAddress);
 			}
@@ -242,4 +243,9 @@ void ModuleNetworkingClient::onDisconnect()
 	}
 
 	App->modRender->cameraPosition = {};
+}
+
+void ModuleNetworkingClient::SetLastInput(uint32 last)
+{
+	inputDataFront = last;
 }

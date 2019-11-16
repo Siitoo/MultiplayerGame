@@ -12,7 +12,7 @@ public:
 
 	void setListenPort(int port);
 
-
+	uint32 GetLastInputSequenceNumberById(uint32 networkId);
 
 private:
 

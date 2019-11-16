@@ -82,5 +82,14 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 			break;
 		}
 		}
+
+		bool input = false;
+		packet >> input;
+		if (input)
+		{
+			uint32 lastInput = 0;
+			packet >> lastInput;
+			App->modNetClient->SetLastInput(lastInput);
+		}
 	}
 }

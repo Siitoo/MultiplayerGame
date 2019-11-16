@@ -8,6 +8,7 @@ struct ReplicationCommand
 {
 	ReplicationAction action = ReplicationAction::None;
 	uint32 networkId;
+	bool input = false;
 };
 
 class ReplicationManagerServer
@@ -17,7 +18,7 @@ public:
 	void Create(uint32 networkId);
 	void Update(uint32 networkId);
 	void Destroy(uint32 networkId);
-
+	void InputNumber(uint32 networkId);
 	void Write(OutputMemoryStream &packet);
 
 	void SetClientId(uint32 clientId);
