@@ -19,7 +19,7 @@ struct Spaceship : public Behaviour
 {
 	void start() override
 	{
-		gameObject->tag = (uint32)(Random.next() * UINT_MAX);
+		gameObject->parent_tag = (uint32)(Random.next() * UINT_MAX);
 	}
 
 	void onInput(const InputController &input) override
@@ -41,13 +41,13 @@ struct Spaceship : public Behaviour
 		if (input.actionLeft == ButtonState::Press)
 		{
 			GameObject * laser = App->modNetServer->spawnBullet(gameObject);
-			//laser->tag = gameObject->tag;
+			laser->parent_tag = gameObject->parent_tag;
 		}
 	}
 
 	void onCollisionTriggered(Collider &c1, Collider &c2) override
 	{
-		if (c2.type == ColliderType::Laser && c2.gameObject->parent_tag != gameObject->tag)
+		if (c2.type == ColliderType::Laser && c2.gameObject->parent_tag != gameObject->parent_tag)
 		{
 			NetworkDestroy(c2.gameObject); // Destroy the laser
 
