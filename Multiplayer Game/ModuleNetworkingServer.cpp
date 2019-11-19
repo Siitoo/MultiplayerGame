@@ -37,7 +37,7 @@ void ModuleNetworkingServer::onStart()
 	}
 
 	state = ServerState::Listening;
-
+	deliveryManager.server = true;
 	secondsSinceLastPing = 0.0f;
 }
 
@@ -181,6 +181,11 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 
 			}
 		}
+		else if (message == ClientMessage::Ping)
+		{
+			if(deliveryManager.hasSequenceNumbersPendingAck() && packet.RemainingByteCount() > 0)
+				deliveryManager.processAckdSequenceNumbers(packet);
+		}
 
 		if (proxy != nullptr)
 		{
@@ -215,8 +220,10 @@ void ModuleNetworkingServer::onUpdate()
 			if (clientProxy.connected)
 			{
 				OutputMemoryStream packet;
+
 				packet << ServerMessage::Replication;
 
+				
 				// TODO(jesus): If the replication interval passed and the replication manager of this proxy
 				//              has pending data, write and send a replication packet to this client.
 
@@ -227,6 +234,7 @@ void ModuleNetworkingServer::onUpdate()
 
 					if (clientProxy.replication_server.HasCommands())
 					{
+						deliveryManager.writeSequenceNumber(packet);
 						clientProxy.replication_server.Write(packet);
 						sendPacket(packet, clientProxy.address);
 					}
@@ -246,6 +254,8 @@ void ModuleNetworkingServer::onUpdate()
 			}
 		}
 	}
+
+	deliveryManager.processTimeOutPackets();
 }
 
 void ModuleNetworkingServer::onConnectionReset(const sockaddr_in & fromAddress)

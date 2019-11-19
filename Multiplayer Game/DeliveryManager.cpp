@@ -1,14 +1,15 @@
 #include "Networks.h"
+#include "DeliveryDelegate.h"
 #include "DeliveryManager.h"
-
 //Delivery manager functions
 
 Delivery* DeliveryManager::writeSequenceNumber(OutputMemoryStream& packet) 
 {
 	Delivery delivery;
 
+	delivery.dispatchTime = Time.deltaTime;
 	delivery.sequenceNumber = nextSequenceNumber++;
-
+	
 	packet << delivery.sequenceNumber;
 
 	if (server)
@@ -34,6 +35,8 @@ bool DeliveryManager::processSequenceNumber(const InputMemoryStream& packet)
 
 		if (!server)
 			sequenceNumberPendingAck.push_back(sequenceNumber);
+
+		ret = true;
 	}
 
 	return ret;
@@ -41,7 +44,14 @@ bool DeliveryManager::processSequenceNumber(const InputMemoryStream& packet)
 
 bool DeliveryManager::hasSequenceNumbersPendingAck() const
 {
-	return sequenceNumberPendingAck.size() > 0;
+	bool ret = false;
+
+	if (server)
+		ret = pendingDeliveries.size() > 0;
+	else
+		ret = sequenceNumberPendingAck.size() > 0;
+
+	return ret;
 }
 
 void DeliveryManager::writeSequenceNumbersPendingAck(OutputMemoryStream& packet)
@@ -73,9 +83,32 @@ void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet
 	if (AckSize)
 	{
 		packet >> range;
+
+		for (uint32 i = 0; i < pendingDeliveries.size(); ++i)
+		{
+			for (uint32 j = start; j < start + range; ++j)
+			{
+				if (pendingDeliveries.size() > 0)
+				{
+					if (j == pendingDeliveries[i].sequenceNumber)
+					{
+						onDeliverySuccess(&pendingDeliveries[i]);
+						pendingDeliveries.erase(pendingDeliveries.begin() + i);
+						i = 0;
+					}
+					else if (j < pendingDeliveries[i].sequenceNumber)
+					{
+						onDeliveryFailure(&pendingDeliveries[i]);
+						pendingDeliveries.erase(pendingDeliveries.begin() + i);
+						i = 0;
+					}
+				}
+			}
+		}
+
 	}
 
-	clear(start,range);
+	//clear(start,range);
 }
 
 void DeliveryManager::processTimeOutPackets()
@@ -86,7 +119,13 @@ void DeliveryManager::processTimeOutPackets()
 		{
 			if (it->dispatchTime > timeoutAck)
 			{
+				onDeliveryFailure(it._Ptr);
 				pendingDeliveries.erase(it);
+
+				if (pendingDeliveries.size() > 0)
+					it = pendingDeliveries.begin();
+				else
+					break;
 			}
 			else
 			{
@@ -118,8 +157,6 @@ void DeliveryManager::clear(uint32 start,uint32 size)
 				break;
 			}
 		}
-
-
 	}
 	else
 	{
@@ -127,3 +164,13 @@ void DeliveryManager::clear(uint32 start,uint32 size)
 	}
 }
 
+//Question, no tengo ni idea
+void DeliveryManager::onDeliverySuccess(Delivery* delivery)
+{
+	//delivery->deliveryDelegate->onDeliverySuccess(this);
+}
+
+void DeliveryManager::onDeliveryFailure(Delivery* delivery)
+{
+	//delivery->deliveryDelegate->onDeliveryFailure(this);
+}

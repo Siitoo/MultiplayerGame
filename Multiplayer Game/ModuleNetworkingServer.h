@@ -1,5 +1,4 @@
 #pragma once
-
 #include "ModuleNetworking.h"
 
 class ModuleNetworkingServer : public ModuleNetworking
@@ -113,6 +112,8 @@ private:
 	float secondsSinceLastPing = 0.0f;
 	
 	float replicationDeliveryIntervalSeconds = 0.1f;
+
+	DeliveryManager deliveryManager;
 };
 
 

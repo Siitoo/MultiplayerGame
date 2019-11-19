@@ -2,12 +2,7 @@
 #define _DELIVERYMANAGER_
 
 class DeliveryDelegate;
-struct Delivery
-{
-	uint32 sequenceNumber = 0;
-	double dispatchTime = 0.0;
-	DeliveryDelegate *deliveryDelegate = nullptr;
-};
+struct Delivery;
 
 class DeliveryManager
 {
@@ -25,12 +20,14 @@ public:
 
 	void clear(uint32 start = 0, uint32 size = 0);
 
+	void onDeliverySuccess(Delivery *delivery);
+	void onDeliveryFailure(Delivery *delivery);
+
+	bool server = false;
+
 private:
 	uint32 nextSequenceNumber = 0;
 	std::vector<Delivery> pendingDeliveries;
-
-	//Detect if i'm are a server or client
-	bool server = false;
 
 	uint32 nextExpectedSequenceNumber = 0;
 	std::vector<uint32> sequenceNumberPendingAck;
@@ -40,13 +37,6 @@ private:
 };
 
 
-
-class DeliveryDelegate
-{
-public:
-	virtual void onDeliverySuccess(DeliveryManager *deliveryManager) = 0;
-	virtual void onDeliveryFailure(DeliveryManager *deliveryManager) = 0;
-};
 
 
 

@@ -383,6 +383,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="ByteSwap.h" />
+    <ClInclude Include="DeliveryDelegate.h" />
     <ClInclude Include="DeliveryManager.h" />
     <ClInclude Include="Behaviours.h" />
     <ClInclude Include="Maths.h" />

@@ -260,6 +260,9 @@
     <ClInclude Include="Behaviours.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DeliveryDelegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Game\vertex_shader.hlsl">

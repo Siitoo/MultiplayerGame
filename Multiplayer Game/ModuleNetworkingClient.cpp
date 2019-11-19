@@ -134,7 +134,8 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		}
 		else if (message == ServerMessage::Replication)
 		{
-			replicationClient.Read(packet);
+			if(deliveryManager.processSequenceNumber(packet))
+				replicationClient.Read(packet);
 		}
 	}
 }
@@ -166,6 +167,8 @@ void ModuleNetworkingClient::onUpdate()
 			secondsSinceLastPing = 0.0f;
 			OutputMemoryStream packet;
 			packet << ClientMessage::Ping;
+			if(deliveryManager.hasSequenceNumbersPendingAck())
+				deliveryManager.writeSequenceNumbersPendingAck(packet);
 			sendPacket(packet, serverAddress);
 		}
 		else

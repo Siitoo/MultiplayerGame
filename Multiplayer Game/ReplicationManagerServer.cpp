@@ -56,8 +56,6 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet)
 
 		GameObject* go = App->modLinkingContext->getNetworkGameObject(it->networkId);
 
-		
-
 		switch (it->action)
 		{
 
