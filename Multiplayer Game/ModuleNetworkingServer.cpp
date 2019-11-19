@@ -37,7 +37,7 @@ void ModuleNetworkingServer::onStart()
 	}
 
 	state = ServerState::Listening;
-	deliveryManager.server = true;
+	
 	secondsSinceLastPing = 0.0f;
 }
 
@@ -118,7 +118,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				proxy->connected = true;
 				proxy->name = playerName;
 				proxy->clientId = nextClientId++;
-
+				proxy->deliveryManager.server = true;
 				// Create new network object
 				spawnPlayer(*proxy, spaceshipType);
 				// Send welcome to the new player
@@ -183,8 +183,8 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 		}
 		else if (message == ClientMessage::Ping)
 		{
-			if(deliveryManager.hasSequenceNumbersPendingAck() && packet.RemainingByteCount() > 0)
-				deliveryManager.processAckdSequenceNumbers(packet);
+			if(proxy->deliveryManager.hasSequenceNumbersPendingAck() && packet.RemainingByteCount() > 0)
+				proxy->deliveryManager.processAckdSequenceNumbers(packet);
 		}
 
 		if (proxy != nullptr)
@@ -234,7 +234,7 @@ void ModuleNetworkingServer::onUpdate()
 
 					if (clientProxy.replication_server.HasCommands())
 					{
-						deliveryManager.writeSequenceNumber(packet);
+						clientProxy.deliveryManager.writeSequenceNumber(packet);
 						clientProxy.replication_server.Write(packet);
 						sendPacket(packet, clientProxy.address);
 					}
@@ -252,10 +252,12 @@ void ModuleNetworkingServer::onUpdate()
 				if (clientProxy.connected)
 					NetworkDestroy(clientProxy.gameObject);
 			}
+
+			clientProxy.deliveryManager.processTimeOutPackets();
 		}
 	}
 
-	deliveryManager.processTimeOutPackets();
+	
 }
 
 void ModuleNetworkingServer::onConnectionReset(const sockaddr_in & fromAddress)

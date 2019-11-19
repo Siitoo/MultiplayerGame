@@ -55,6 +55,7 @@ private:
 		InputController gamepad;
 
 		ReplicationManagerServer replication_server;
+		DeliveryManager deliveryManager;
 	};
 
 	ClientProxy clientProxies[MAX_CLIENTS];
@@ -113,7 +114,7 @@ private:
 	
 	float replicationDeliveryIntervalSeconds = 0.1f;
 
-	DeliveryManager deliveryManager;
+	
 };
 
 
