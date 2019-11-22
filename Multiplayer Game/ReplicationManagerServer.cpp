@@ -1,5 +1,25 @@
 #include "Networks.h"
+#include "DeliveryDelegate.h"
 #include "ReplicationManagerServer.h"
+
+class DeliveryReplicationCommand : public DeliveryDelegate
+{
+public:
+	
+
+	void onDeliverySuccess(DeliveryManager* deliveryManager) const
+	{
+		int x = 0;
+	}
+
+	void onDeliveryFailure(DeliveryManager* deliveryManager) const
+	{
+		int y = 0;
+	}
+
+	uint32 networkId = 0;
+	std::vector<ReplicationCommand> deliveryReplicationCommands;
+};
 
 void ReplicationManagerServer::Create(uint32 networkId)
 {
@@ -47,8 +67,10 @@ void ReplicationManagerServer::InputNumber(uint32 networkId )
 	}
 }
 
-void ReplicationManagerServer::Write(OutputMemoryStream &packet)
+void ReplicationManagerServer::Write(OutputMemoryStream &packet, Delivery& delivery)
 {
+	delivery.deliveryDelegate = new DeliveryReplicationCommand();
+	
 	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
 	{
 		packet << it->networkId;

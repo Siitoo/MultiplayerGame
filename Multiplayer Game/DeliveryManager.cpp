@@ -9,13 +9,14 @@ Delivery* DeliveryManager::writeSequenceNumber(OutputMemoryStream& packet)
 
 	delivery.dispatchTime = Time.deltaTime;
 	delivery.sequenceNumber = nextSequenceNumber++;
-	
+
+
 	packet << delivery.sequenceNumber;
 
 	if (server)
 	{
 		pendingDeliveries.push_back(delivery);
-		return &delivery;
+		return &pendingDeliveries.back();
 	}
 	else
 		return nullptr;
@@ -167,10 +168,10 @@ void DeliveryManager::clear(uint32 start,uint32 size)
 //Question, no tengo ni idea
 void DeliveryManager::onDeliverySuccess(Delivery* delivery)
 {
-	//delivery->deliveryDelegate->onDeliverySuccess(this);
+	delivery->deliveryDelegate->onDeliverySuccess(this);
 }
 
 void DeliveryManager::onDeliveryFailure(Delivery* delivery)
 {
-	//delivery->deliveryDelegate->onDeliveryFailure(this);
+	delivery->deliveryDelegate->onDeliveryFailure(this);
 }

@@ -19,7 +19,7 @@ public:
 	void Update(uint32 networkId);
 	void Destroy(uint32 networkId);
 	void InputNumber(uint32 networkId);
-	void Write(OutputMemoryStream &packet);
+	void Write(OutputMemoryStream &packet, Delivery& delivery);
 
 	void SetClientId(uint32 clientId);
 	uint32 GetClientId();

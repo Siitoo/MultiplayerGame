@@ -234,8 +234,9 @@ void ModuleNetworkingServer::onUpdate()
 
 					if (clientProxy.replication_server.HasCommands())
 					{
-						clientProxy.deliveryManager.writeSequenceNumber(packet);
-						clientProxy.replication_server.Write(packet);
+						Delivery* delivery = clientProxy.deliveryManager.writeSequenceNumber(packet);
+						clientProxy.replication_server.Write(packet,*delivery);
+						
 						sendPacket(packet, clientProxy.address);
 					}
 

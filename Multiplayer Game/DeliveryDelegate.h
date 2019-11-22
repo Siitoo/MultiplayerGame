@@ -11,13 +11,11 @@ public:
 	virtual void onDeliveryFailure(DeliveryManager *deliveryManager) const = 0;
 };
 
-typedef std::shared_ptr<DeliveryDelegate> DeliveryDelegatePtr;
-
 struct Delivery
 {
 	uint32 sequenceNumber = 0;
 	double dispatchTime = 0.0;
-	DeliveryDelegatePtr deliveryDelegate;
+	DeliveryDelegate* deliveryDelegate = nullptr;
 };
 
 #endif // !_DELIVERYDELEGATE_
