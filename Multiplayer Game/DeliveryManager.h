@@ -32,7 +32,7 @@ private:
 	uint32 nextExpectedSequenceNumber = 0;
 	std::vector<uint32> sequenceNumberPendingAck;
 
-	float timeoutAck = 0.8f;
+	float timeoutAck = 3.0f;
 
 };
 

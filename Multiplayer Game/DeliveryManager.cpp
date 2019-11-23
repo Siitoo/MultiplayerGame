@@ -7,7 +7,7 @@ Delivery* DeliveryManager::writeSequenceNumber(OutputMemoryStream& packet)
 {
 	Delivery delivery;
 
-	delivery.dispatchTime = Time.deltaTime;
+	delivery.dispatchTime = 0.0f;
 	delivery.sequenceNumber = nextSequenceNumber++;
 
 
@@ -66,7 +66,7 @@ void DeliveryManager::writeSequenceNumbersPendingAck(OutputMemoryStream& packet)
 	if(AckSize)
 	{
 		uint32 range = sequenceNumberPendingAck.size();
-		packet << range - 1;
+		packet << range;
 	}
 
 	clear();
@@ -148,7 +148,7 @@ void DeliveryManager::clear(uint32 start,uint32 size)
 			{
 				for (uint32 i = 0; i < size; ++i)
 				{
-					//(*it)->deliveryDelegate->onDeliverySuccess();
+					//(*it)->deliveryDelegate->onDeliverySuccess(&(*it));
 
 					//Sito i don't know if need increment or not it++
 					pendingDeliveries.erase(it);

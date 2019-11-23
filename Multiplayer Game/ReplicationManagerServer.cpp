@@ -117,6 +117,8 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet, Delivery& deliv
 			it->input = false;
 		}
 
+		((DeliveryReplicationCommand*)delivery.deliveryDelegate)->deliveryReplicationCommands.push_back(*it);
+
 		it->action = ReplicationAction::None;
 	}
 
