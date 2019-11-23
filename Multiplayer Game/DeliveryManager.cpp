@@ -171,6 +171,9 @@ void DeliveryManager::clear(uint32 start,uint32 size)
 	else
 	{
 		sequenceNumberPendingAck.clear();
+		nextExpectedSequenceNumber = 0;
+		nextSequenceNumber = 0;
+		pendingDeliveries.clear();
 	}
 }
 

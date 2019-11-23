@@ -10,7 +10,8 @@ public:
 	void onDeliverySuccess(DeliveryManager* deliveryManager) const
 	{
 		ReplicationManagerServer* rs = App->modNetServer->GetReplicationServerForProxyId(clientId);
-
+		if (rs == nullptr)
+			return;
 		for (int i = 0; i < deliveryReplicationCommands.size(); ++i)
 		{
 			ReplicationCommand rc = deliveryReplicationCommands[i];
@@ -38,7 +39,8 @@ public:
 	void onDeliveryFailure(DeliveryManager* deliveryManager) const
 	{
 		ReplicationManagerServer* rs = App->modNetServer->GetReplicationServerForProxyId(clientId);
-		
+		if (rs == nullptr)
+			return;
 		for (int i = 0; i < deliveryReplicationCommands.size(); ++i)
 		{
 			ReplicationCommand rc = deliveryReplicationCommands[i];

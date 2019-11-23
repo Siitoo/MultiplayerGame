@@ -272,6 +272,8 @@ void ModuleNetworkingClient::onDisconnect()
 	}
 
 	App->modRender->cameraPosition = {};
+	deliveryManager.clear();
+	
 }
 
 void ModuleNetworkingClient::SetLastInput(uint32 last)
