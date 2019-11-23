@@ -75,7 +75,7 @@ void ModuleNetworkingServer::onGui()
 					ImGui::Text(" - id: %d", clientProxies[i].clientId);
 					ImGui::Text(" - Last packet time: %.04f", clientProxies[i].lastPacketReceivedTime);
 					ImGui::Text(" - Seconds since repl.: %.04f", clientProxies[i].secondsSinceLastReplication);
-					
+					ImGui::Text("Client parent tag: %i", clientProxies[i].gameObject->parent_tag);
 					ImGui::Separator();
 				}
 			}
@@ -409,11 +409,13 @@ GameObject * ModuleNetworkingServer::spawnBullet(GameObject *parent)
 	gameObject->texture = App->modResources->laser;
 	gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
 	gameObject->tag = 3;
+	//Sito test
 	gameObject->parent_tag = parent->tag;
 	// Create behaviour
 	gameObject->behaviour = new Laser;
 	gameObject->behaviour->gameObject = gameObject;
 	gameObject->behaviour->DoUpdate();
+	gameObject->parent = parent;
 	// Assign a new network identity to the object
 	App->modLinkingContext->registerNetworkGameObject(gameObject);
 

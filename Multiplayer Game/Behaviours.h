@@ -13,6 +13,7 @@ struct Behaviour
 	virtual void onCollisionTriggered(Collider &c1, Collider &c2) { }
 
 	virtual void DoUpdate() { }
+	virtual bool GetUpdate() { return false; }
 };
 
 struct Spaceship : public Behaviour
@@ -49,12 +50,24 @@ struct Spaceship : public Behaviour
 	{
 		if (c2.type == ColliderType::Laser && c2.gameObject->parent_tag != gameObject->parent_tag)
 		{
-			NetworkDestroy(c2.gameObject); // Destroy the laser
+			if (c2.gameObject->behaviour->GetUpdate()) // Check if are a server testing collision
+			{
+				NetworkDestroy(c2.gameObject); // Destroy the laser
 
-			// NOTE(jesus): spaceship was collided by a laser
-			// Be careful, if you do NetworkDestroy(gameObject) directly,
-			// the client proxy will poing to an invalid gameObject...
-			// instead, make the gameObject invisible or disconnect the client.
+				if (gameObject->totalLife - 1 == 0)
+				{
+					NetworkDestroy(gameObject);
+					c2.gameObject->parent->totalKills++;
+				}
+				else
+					gameObject->totalLife--;
+
+
+				// NOTE(jesus): spaceship was collided by a laser
+				// Be careful, if you do NetworkDestroy(gameObject) directly,
+				// the client proxy will poing to an invalid gameObject...
+				// instead, make the gameObject invisible or disconnect the client.
+			}
 		}
 	}
 };
@@ -96,7 +109,8 @@ struct Laser : public Behaviour
 		const float lifetimeSeconds = 2.0f;
 
 		if (secondsSinceCreation > lifetimeSeconds) NetworkDestroy(gameObject);
-			
-		
 	}
+
+	bool GetUpdate() { return do_update; }
+
 };

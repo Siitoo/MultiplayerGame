@@ -11,8 +11,10 @@ struct GameObject
 	float angle = 0.0f;
 	vec4 color = vec4{ 1.0f, 1.0f, 1.0f, 1.0f }; // NOTE(jesus): The texture will tinted with this color
 	Texture * texture = nullptr;
+	int totalKills = 0;
+	int totalLife = 3;
 	int  order = 0;          // NOTE(jesus): determines the drawing order
-
+	GameObject* parent=nullptr;
 	// Collider component
 	Collider *collider = nullptr;
 
@@ -58,7 +60,7 @@ public:
 
 	static void Destroy(GameObject * gameObject);
 
-
+	//GameObject* GetGameObjectByTag(uint32 tag);
 
 	GameObject gameObjects[MAX_GAME_OBJECTS] = {};
 };

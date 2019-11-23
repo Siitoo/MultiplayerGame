@@ -1,6 +1,6 @@
 #include "Networks.h"
 
-
+#include <string>
 
 //////////////////////////////////////////////////////////////////////
 // ModuleNetworkingClient public methods
@@ -100,6 +100,26 @@ void ModuleNetworkingClient::onGui()
 			ImGui::InputFloat("Delivery interval (s)", &inputDeliveryIntervalSeconds, 0.01f, 0.1f, 4);
 		}
 	}
+
+	if (state == ClientState::Playing)
+	{
+		if (ImGui::CollapsingHeader("Statistics", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
+			if (go != nullptr)
+			{
+				std::string tlife = "Current Life: ";
+				tlife += std::to_string(go->totalLife);
+
+				std::string tkills = "Total Kills: ";
+				tkills += std::to_string(go->totalKills);
+
+				ImGui::Text(tlife.c_str());
+				ImGui::Text(tkills.c_str());
+			}
+		}
+	}
+	
 }
 
 void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, const sockaddr_in &fromAddress)
