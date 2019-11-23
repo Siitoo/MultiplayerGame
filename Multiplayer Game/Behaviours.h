@@ -62,7 +62,7 @@ struct Spaceship : public Behaviour
 struct Laser : public Behaviour
 {
 	float secondsSinceCreation = 0.0f;
-
+	float secondsSinceCreationClient = 0.0f;
 	bool do_update = false;
 
 	void DoUpdate()
@@ -81,7 +81,20 @@ struct Laser : public Behaviour
 
 			NetworkUpdate(gameObject);
 		}
+		else
+		{
+	
+			secondsSinceCreationClient += Time.deltaTime;
+			const float lifetimeSecondsClient = 10.0f;
+			if (secondsSinceCreationClient > lifetimeSecondsClient)
+			{
+				App->modLinkingContext->unregisterNetworkGameObject(gameObject);
+				if(gameObject->networkId == 0)
+					Destroy(gameObject);
+			}
+		}
 		const float lifetimeSeconds = 2.0f;
+
 		if (secondsSinceCreation > lifetimeSeconds) NetworkDestroy(gameObject);
 			
 		

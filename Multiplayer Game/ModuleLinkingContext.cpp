@@ -75,6 +75,26 @@ void ModuleLinkingContext::unregisterNetworkGameObject(GameObject *gameObject)
 		gameObject->networkId = 0;
 		networkGameObjectsCount--;
 	}
+	else
+	{
+		networkGameObjectsCount = 0;
+		for (int i = 0; i < MAX_NETWORK_OBJECTS; ++i)
+		{
+			if (networkGameObjects[i] != nullptr)
+			{
+				networkGameObjectsCount++;
+
+				if (networkGameObjects[i]->networkId == gameObject->networkId)
+				{
+					networkGameObjects[i] = nullptr;
+					gameObject->networkId = 0;
+					networkGameObjectsCount--;
+				}
+			}
+
+		}
+		gameObject->networkId = 0;
+	}
 }
 
 void ModuleLinkingContext::clear()
