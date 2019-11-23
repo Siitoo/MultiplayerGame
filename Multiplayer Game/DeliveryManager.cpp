@@ -39,6 +39,15 @@ bool DeliveryManager::processSequenceNumber(const InputMemoryStream& packet)
 
 		ret = true;
 	}
+	else if (sequenceNumber > nextExpectedSequenceNumber)
+	{
+		nextExpectedSequenceNumber = sequenceNumber + 1;
+
+		if (!server)
+			sequenceNumberPendingAck.push_back(sequenceNumber);
+
+		ret = true;
+	}
 
 	return ret;
 }

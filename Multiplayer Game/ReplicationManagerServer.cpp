@@ -9,15 +9,70 @@ public:
 
 	void onDeliverySuccess(DeliveryManager* deliveryManager) const
 	{
-		int x = 0;
+		ReplicationManagerServer* rs = App->modNetServer->GetReplicationServerForProxyId(clientId);
+
+		for (int i = 0; i < deliveryReplicationCommands.size(); ++i)
+		{
+			ReplicationCommand rc = deliveryReplicationCommands[i];
+
+			switch (rc.action)
+			{
+			case ReplicationAction::Create:
+			{
+				break;
+			}
+			case ReplicationAction::Update:
+			{
+				break;
+			}
+			case ReplicationAction::Destroy:
+			{
+				rs->SuccesDestroy(rc.networkId);
+				break;
+			}
+			}
+
+		}
 	}
 
 	void onDeliveryFailure(DeliveryManager* deliveryManager) const
 	{
-		int y = 0;
+		ReplicationManagerServer* rs = App->modNetServer->GetReplicationServerForProxyId(clientId);
+		
+		for (int i = 0; i < deliveryReplicationCommands.size(); ++i)
+		{
+			ReplicationCommand rc = deliveryReplicationCommands[i];
+			GameObject* go = App->modLinkingContext->getNetworkGameObject(rc.networkId);
+
+
+			switch (rc.action)
+			{
+			case ReplicationAction::Create:
+			{
+				if (go != nullptr)
+				{
+					rs->HandleCreate(rc.networkId);
+				}
+				break;
+			}
+			case ReplicationAction::Update:
+			{
+				if (go!= nullptr)
+				{
+					rs->Update(rc.networkId);
+				}
+				break;
+			}
+			case ReplicationAction::Destroy:
+			{
+				rs->Destroy(rc.networkId);
+				break;
+			}
+			}
+		}
 	}
 
-	uint32 networkId = 0;
+	uint32 clientId = 0;
 	std::vector<ReplicationCommand> deliveryReplicationCommands;
 };
 
@@ -28,6 +83,21 @@ void ReplicationManagerServer::Create(uint32 networkId)
 	command.action = ReplicationAction::Create;
 	commands.push_back(command);
 }
+
+void ReplicationManagerServer::HandleCreate(uint32 networkId)
+{
+	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
+	{
+		if ((*it).networkId == networkId)
+		{
+			if((*it).action != ReplicationAction::Destroy)
+				(*it).action = ReplicationAction::Create;
+
+			break;
+		}
+	}
+}
+
 
 void ReplicationManagerServer::Update(uint32 networkId)
 {
@@ -55,6 +125,18 @@ void ReplicationManagerServer::Destroy(uint32 networkId)
 	}
 }
 
+void ReplicationManagerServer::SuccesDestroy(uint32 networkId)
+{
+	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
+	{
+		if ((*it).networkId == networkId)
+		{
+			commands.erase(it);
+			break;
+		}
+	}
+}
+
 void ReplicationManagerServer::InputNumber(uint32 networkId )
 {
 	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
@@ -70,7 +152,7 @@ void ReplicationManagerServer::InputNumber(uint32 networkId )
 void ReplicationManagerServer::Write(OutputMemoryStream &packet, Delivery& delivery)
 {
 	delivery.deliveryDelegate = new DeliveryReplicationCommand();
-	
+	((DeliveryReplicationCommand*)delivery.deliveryDelegate)->clientId = clientId;
 	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
 	{
 		packet << it->networkId;

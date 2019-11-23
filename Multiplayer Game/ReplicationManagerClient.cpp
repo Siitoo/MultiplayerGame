@@ -26,6 +26,7 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 			packet >> go->size.y;
 			packet >> go->angle;
 			packet >> go->tag;
+			packet >> go->parent_tag;
 
 			if (go->tag == 0)
 			{
@@ -46,16 +47,18 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 			{
 				go->collider = App->modCollision->addCollider(ColliderType::Player, go);
 				go->behaviour = new Spaceship;
+				App->modLinkingContext->registerNetworkGameObject(go);
 			}
 			else
 			{
 				go->collider = App->modCollision->addCollider(ColliderType::Laser, go);
 				go->behaviour = new Laser;
+				App->modLinkingContext->registerNetworkGameObjectWithNetworkId(go, replication_packet.networkId);
 			}
-			packet >> go->parent_tag;
+			
 
 			go->behaviour->gameObject = go;
-			App->modLinkingContext->registerNetworkGameObject(go);
+
 			break;
 		}
 		case ReplicationAction::Update:
@@ -70,15 +73,25 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 				packet >> go->position.y;
 				packet >> go->angle;
 			}
+			else
+			{
+				vec2 fakePosition;
+				float fakeAngle;
+				packet >> fakePosition.x;
+				packet >> fakePosition.y;
+				packet >> fakeAngle;
+			}
 
 			break;
 		}
 		case ReplicationAction::Destroy:
 		{
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
-			App->modLinkingContext->unregisterNetworkGameObject(go);
-			Destroy(go);
-
+			if (go != nullptr)
+			{
+				App->modLinkingContext->unregisterNetworkGameObject(go);
+				Destroy(go);
+			}
 			break;
 		}
 		}

@@ -503,3 +503,19 @@ uint32 ModuleNetworkingServer::GetLastInputSequenceNumberById(uint32 networkId)
 
 	return ret - 1;
 }
+
+ReplicationManagerServer* ModuleNetworkingServer::GetReplicationServerForProxyId(uint32 id)
+{
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (clientProxies[i].connected)
+		{
+			if (clientProxies[i].clientId == id)
+			{
+				return &clientProxies[i].replication_server;
+			}
+		}
+	}
+
+	return nullptr;
+}

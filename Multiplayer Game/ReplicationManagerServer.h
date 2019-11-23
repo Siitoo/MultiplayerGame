@@ -21,6 +21,9 @@ public:
 	void InputNumber(uint32 networkId);
 	void Write(OutputMemoryStream &packet, Delivery& delivery);
 
+	void HandleCreate(uint32 networkId);
+	void SuccesDestroy(uint32 networkId);
+
 	void SetClientId(uint32 clientId);
 	uint32 GetClientId();
 
