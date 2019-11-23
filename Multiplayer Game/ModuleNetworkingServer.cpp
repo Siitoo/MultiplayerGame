@@ -208,7 +208,11 @@ void ModuleNetworkingServer::onUpdate()
 			for (ClientProxy &clientProxy : clientProxies)
 			{
 				if (clientProxy.connected)
+				{
+					packet << clientProxy.gameObject->totalLife;
+					packet << clientProxy.gameObject->totalKills;
 					sendPacket(packet, clientProxy.address);
+				}
 			}
 		}
 		else

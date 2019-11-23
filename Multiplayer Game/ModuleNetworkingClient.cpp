@@ -150,6 +150,12 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		// TODO(jesus): Handle incoming messages from server
 		if (message == ServerMessage::Ping)
 		{
+			GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
+			if (go != nullptr)
+			{
+				packet >> go->totalLife;
+				packet >> go->totalKills;
+			}
 			lastPacketReceivedTime = Time.time;
 		}
 		else if (message == ServerMessage::Replication)

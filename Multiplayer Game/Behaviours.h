@@ -48,19 +48,19 @@ struct Spaceship : public Behaviour
 
 	void onCollisionTriggered(Collider &c1, Collider &c2) override
 	{
-		if (c2.type == ColliderType::Laser && c2.gameObject->parent_tag != gameObject->parent_tag)
+		if (c2.type == ColliderType::Laser && c2.gameObject->parent_tag != c1.gameObject->parent_tag)
 		{
 			if (c2.gameObject->behaviour->GetUpdate()) // Check if are a server testing collision
 			{
 				NetworkDestroy(c2.gameObject); // Destroy the laser
 
-				if (gameObject->totalLife - 1 == 0)
+				if (c1.gameObject->totalLife - 1 == 0)
 				{
-					NetworkDestroy(gameObject);
+					NetworkDestroy(c1.gameObject);
 					c2.gameObject->parent->totalKills++;
 				}
 				else
-					gameObject->totalLife--;
+					c1.gameObject->totalLife--;
 
 
 				// NOTE(jesus): spaceship was collided by a laser
