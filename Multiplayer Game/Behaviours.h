@@ -72,17 +72,18 @@ struct Laser : public Behaviour
 
 	void update() override
 	{
+		const float pixelsPerSecond = 1000.0f;
 		if (do_update)
 		{
-			const float pixelsPerSecond = 1000.0f;
 			gameObject->position += vec2FromDegrees(gameObject->angle) * pixelsPerSecond * Time.deltaTime;
 
 			secondsSinceCreation += Time.deltaTime;
 
 			NetworkUpdate(gameObject);
-
-			const float lifetimeSeconds = 2.0f;
-			if (secondsSinceCreation > lifetimeSeconds) NetworkDestroy(gameObject);
 		}
+		const float lifetimeSeconds = 2.0f;
+		if (secondsSinceCreation > lifetimeSeconds) NetworkDestroy(gameObject);
+			
+		
 	}
 };

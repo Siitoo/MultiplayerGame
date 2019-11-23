@@ -16,49 +16,67 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 		{
 		case ReplicationAction::Create:
 		{
-			GameObject* go = Instantiate();
-
-			go->networkId = replication_packet.networkId;
-
-			packet >> go->position.x;
-			packet >> go->position.y;
-			packet >> go->size.x;
-			packet >> go->size.y;
-			packet >> go->angle;
-			packet >> go->tag;
-			packet >> go->parent_tag;
-
-			if (go->tag == 0)
+			GameObject* tmp_go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
+			if (tmp_go == nullptr)
 			{
-				go->texture = App->modResources->spacecraft1;
-			}
-			else if (go->tag == 1)
-			{
-				go->texture = App->modResources->spacecraft2;
-			}
-			else if (go->tag == 2)
-			{
-				go->texture = App->modResources->spacecraft3;
+				GameObject* go = Instantiate();
+
+				go->networkId = replication_packet.networkId;
+
+				packet >> go->position.x;
+				packet >> go->position.y;
+				packet >> go->size.x;
+				packet >> go->size.y;
+				packet >> go->angle;
+				packet >> go->tag;
+				packet >> go->parent_tag;
+
+				if (go->tag == 0)
+				{
+					go->texture = App->modResources->spacecraft1;
+				}
+				else if (go->tag == 1)
+				{
+					go->texture = App->modResources->spacecraft2;
+				}
+				else if (go->tag == 2)
+				{
+					go->texture = App->modResources->spacecraft3;
+				}
+				else
+					go->texture = App->modResources->laser;
+
+				if (go->tag < 3)
+				{
+					go->collider = App->modCollision->addCollider(ColliderType::Player, go);
+					go->behaviour = new Spaceship;
+					App->modLinkingContext->registerNetworkGameObject(go);
+				}
+				else
+				{
+					go->collider = App->modCollision->addCollider(ColliderType::Laser, go);
+					go->behaviour = new Laser;
+					App->modLinkingContext->registerNetworkGameObjectWithNetworkId(go, replication_packet.networkId);
+				}
+
+
+				go->behaviour->gameObject = go;
 			}
 			else
-				go->texture = App->modResources->laser;
+			{
+				vec2 fakePosition;
+				vec2 fakeSize;
+				float fakeAngle;
 
-			if (go->tag < 3)
-			{
-				go->collider = App->modCollision->addCollider(ColliderType::Player, go);
-				go->behaviour = new Spaceship;
-				App->modLinkingContext->registerNetworkGameObject(go);
-			}
-			else
-			{
-				go->collider = App->modCollision->addCollider(ColliderType::Laser, go);
-				go->behaviour = new Laser;
-				App->modLinkingContext->registerNetworkGameObjectWithNetworkId(go, replication_packet.networkId);
-			}
+				packet >> fakePosition.x;
+				packet >> fakePosition.y;
 			
-
-			go->behaviour->gameObject = go;
-
+				packet >> fakeSize.x;
+				packet >> fakeSize.y;
+				packet >> fakeAngle;
+				packet >> tmp_go->tag;
+				packet >> tmp_go->parent_tag;
+			}
 			break;
 		}
 		case ReplicationAction::Update:
@@ -91,6 +109,10 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 			{
 				App->modLinkingContext->unregisterNetworkGameObject(go);
 				Destroy(go);
+			}
+			else
+			{
+				int y = 0;
 			}
 			break;
 		}
