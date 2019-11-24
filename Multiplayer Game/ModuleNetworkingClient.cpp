@@ -234,6 +234,17 @@ void ModuleNetworkingClient::onUpdate()
 
 				sendPacket(packet, serverAddress);
 			}
+			//Sito this is for the movement of game object in local
+			GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
+
+			if (go != nullptr)
+			{
+				InputController controller;
+				controller.horizontalAxis = Input.horizontalAxis;
+				controller.verticalAxis = Input.verticalAxis;
+				unpackInputControllerButtons(inputPacketData.buttonBits, controller);
+				go->behaviour->onInput(controller,false);
+			}
 		}
 	}
 
@@ -280,5 +291,21 @@ void ModuleNetworkingClient::onDisconnect()
 
 void ModuleNetworkingClient::SetLastInput(uint32 last)
 {
+	GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
+
+	for (uint32 i = last; i < inputDataBack; ++i)
+	{
+		InputPacketData &inputPacketData = inputData[i % ArrayCount(inputData)];
+
+		if (go != nullptr)
+		{
+			InputController controller;
+			controller.horizontalAxis = inputPacketData.horizontalAxis;
+			controller.verticalAxis = inputPacketData.verticalAxis;
+			unpackInputControllerButtons(inputPacketData.buttonBits, controller);
+			go->behaviour->onInput(controller,false);
+		}
+	}
+
 	inputDataFront = last;
 }

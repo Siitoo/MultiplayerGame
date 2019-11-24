@@ -8,7 +8,7 @@ struct Behaviour
 
 	virtual void update() { }
 
-	virtual void onInput(const InputController &input) { }
+	virtual void onInput(const InputController &input, bool server = true) { }
 
 	virtual void onCollisionTriggered(Collider &c1, Collider &c2) { }
 
@@ -23,7 +23,7 @@ struct Spaceship : public Behaviour
 		gameObject->parent_tag = (uint32)(Random.next() * UINT_MAX);
 	}
 
-	void onInput(const InputController &input) override
+	void onInput(const InputController &input, bool server) override
 	{
 		if (input.horizontalAxis != 0.0f)
 		{
@@ -39,7 +39,7 @@ struct Spaceship : public Behaviour
 			NetworkUpdate(gameObject);
 		}
 
-		if (input.actionLeft == ButtonState::Press)
+		if (input.actionLeft == ButtonState::Press && server)
 		{
 			GameObject * laser = App->modNetServer->spawnBullet(gameObject);
 			laser->parent_tag = gameObject->parent_tag;

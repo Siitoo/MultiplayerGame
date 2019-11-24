@@ -482,14 +482,14 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 
 void NetworkUpdate(GameObject * gameObject)
 {
-	ASSERT(App->modNetServer->isConnected());
+	//ASSERT(App->modNetServer->isConnected());
 
 	App->modNetServer->updateNetworkObject(gameObject);
 }
 
 void NetworkDestroy(GameObject * gameObject)
 {
-	ASSERT(App->modNetServer->isConnected());
+	//ASSERT(App->modNetServer->isConnected());
 
 	App->modNetServer->destroyNetworkObject(gameObject);
 }
