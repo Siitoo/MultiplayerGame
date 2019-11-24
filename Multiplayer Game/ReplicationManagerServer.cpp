@@ -194,6 +194,12 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet, Delivery& deliv
 		}
 		}
 
+		if (it->action != ReplicationAction::Destroy && go != nullptr)
+		{
+			packet << go->totalLife;
+			packet << go->totalKills;
+		}
+
 		packet << it->input;
 		if (it->input)
 		{

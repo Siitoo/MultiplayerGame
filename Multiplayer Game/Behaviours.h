@@ -54,7 +54,7 @@ struct Spaceship : public Behaviour
 			{
 				NetworkDestroy(c2.gameObject); // Destroy the laser
 
-				if (c1.gameObject->totalLife - 1 == 0)
+				if (c1.gameObject->totalLife  == 1)
 				{
 					NetworkDestroy(c1.gameObject);
 					c2.gameObject->parent->totalKills++;

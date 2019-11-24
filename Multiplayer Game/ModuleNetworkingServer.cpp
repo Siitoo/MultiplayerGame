@@ -158,27 +158,29 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			// Process the input packet and update the corresponding game object
 			if (proxy != nullptr)
 			{
-				// Read input data
-				while (packet.RemainingByteCount() > 0)
+				if (proxy->gameObject->state != GameObject::State::NON_EXISTING)
 				{
-					InputPacketData inputData;
-					packet >> inputData.sequenceNumber;
-					packet >> inputData.horizontalAxis;
-					packet >> inputData.verticalAxis;
-					packet >> inputData.buttonBits;
-
-					if (inputData.sequenceNumber >= proxy->nextExpectedInputSequenceNumber)
+					// Read input data
+					while (packet.RemainingByteCount() > 0)
 					{
-						proxy->gamepad.horizontalAxis = inputData.horizontalAxis;
-						proxy->gamepad.verticalAxis = inputData.verticalAxis;
-						unpackInputControllerButtons(inputData.buttonBits, proxy->gamepad);
-						proxy->gameObject->behaviour->onInput(proxy->gamepad);
-						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
-					}
-				}
-				
-				proxy->replication_server.InputNumber(proxy->gameObject->networkId);
+						InputPacketData inputData;
+						packet >> inputData.sequenceNumber;
+						packet >> inputData.horizontalAxis;
+						packet >> inputData.verticalAxis;
+						packet >> inputData.buttonBits;
 
+						if (inputData.sequenceNumber >= proxy->nextExpectedInputSequenceNumber)
+						{
+							proxy->gamepad.horizontalAxis = inputData.horizontalAxis;
+							proxy->gamepad.verticalAxis = inputData.verticalAxis;
+							unpackInputControllerButtons(inputData.buttonBits, proxy->gamepad);
+							proxy->gameObject->behaviour->onInput(proxy->gamepad);
+							proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
+						}
+					}
+
+					proxy->replication_server.InputNumber(proxy->gameObject->networkId);
+				}
 			}
 		}
 		else if (message == ClientMessage::Ping)
@@ -209,8 +211,8 @@ void ModuleNetworkingServer::onUpdate()
 			{
 				if (clientProxy.connected)
 				{
-					packet << clientProxy.gameObject->totalLife;
-					packet << clientProxy.gameObject->totalKills;
+					//packet << clientProxy.gameObject->totalLife;
+					//packet << clientProxy.gameObject->totalKills;
 					sendPacket(packet, clientProxy.address);
 				}
 			}

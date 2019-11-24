@@ -12,11 +12,13 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 		packet >> replication_packet.networkId;
 		packet >> replication_packet.action;
 
+		GameObject* tmp_go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
+
 		switch (replication_packet.action)
 		{
 		case ReplicationAction::Create:
 		{
-			GameObject* tmp_go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
+			
 			if (tmp_go == nullptr)
 			{
 				GameObject* go = Instantiate();
@@ -61,6 +63,7 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 
 
 				go->behaviour->gameObject = go;
+				tmp_go = go;
 			}
 			else
 			{
@@ -82,14 +85,12 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 		case ReplicationAction::Update:
 		{
 
-			GameObject* go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
-
 			//Sito this is for laser and crash, well
-			if (go != nullptr)
+			if (tmp_go != nullptr)
 			{
-				packet >> go->position.x;
-				packet >> go->position.y;
-				packet >> go->angle;
+				packet >> tmp_go->position.x;
+				packet >> tmp_go->position.y;
+				packet >> tmp_go->angle;
 			}
 			else
 			{
@@ -104,18 +105,20 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 		}
 		case ReplicationAction::Destroy:
 		{
-			GameObject* go = App->modLinkingContext->getNetworkGameObject(replication_packet.networkId);
-			if (go != nullptr)
+			
+			if (tmp_go != nullptr)
 			{
-				App->modLinkingContext->unregisterNetworkGameObject(go);
-				Destroy(go);
-			}
-			else
-			{
-				int y = 0;
+				App->modLinkingContext->unregisterNetworkGameObject(tmp_go);
+				Destroy(tmp_go);
 			}
 			break;
 		}
+		}
+
+		if (replication_packet.action != ReplicationAction::Destroy && tmp_go != nullptr)
+		{
+			packet >> tmp_go->totalLife;
+			packet >> tmp_go->totalKills;
 		}
 
 		bool input = false;
