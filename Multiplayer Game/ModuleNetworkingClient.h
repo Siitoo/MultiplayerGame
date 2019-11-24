@@ -34,9 +34,10 @@ private:
 
 	void onConnectionReset(const sockaddr_in &fromAddress) override;
 
+public:
 	void onDisconnect() override;
 
-
+private:
 	//////////////////////////////////////////////////////////////////////
 	// Client state
 	//////////////////////////////////////////////////////////////////////
@@ -58,9 +59,10 @@ private:
 	std::string playerName = "player";
 	uint8 spaceshipType = 0;
 
+public:
 	uint32 playerId = 0;
 	uint32 networkId = 0;
-
+private:
 
 	// Input ///////////
 

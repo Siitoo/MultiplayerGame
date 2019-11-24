@@ -52,7 +52,7 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 				{
 					go->collider = App->modCollision->addCollider(ColliderType::Player, go);
 					go->behaviour = new Spaceship;
-					App->modLinkingContext->registerNetworkGameObject(go);
+					App->modLinkingContext->registerNetworkGameObjectWithNetworkId(go, replication_packet.networkId);
 				}
 				else
 				{
@@ -108,6 +108,12 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 			
 			if (tmp_go != nullptr)
 			{
+				if (tmp_go->networkId == App->modNetClient->networkId)
+				{
+					App->modNetClient->onDisconnect();
+					return;
+				}
+
 				App->modLinkingContext->unregisterNetworkGameObject(tmp_go);
 				Destroy(tmp_go);
 			}
@@ -115,7 +121,7 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 		}
 		}
 
-		if (replication_packet.action != ReplicationAction::Destroy && tmp_go != nullptr)
+		if (replication_packet.action != ReplicationAction::Destroy && tmp_go != nullptr && tmp_go->collider->type != ColliderType::Laser)
 		{
 			packet >> tmp_go->totalLife;
 			packet >> tmp_go->totalKills;

@@ -194,7 +194,7 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet, Delivery& deliv
 		}
 		}
 
-		if (it->action != ReplicationAction::Destroy && go != nullptr)
+		if (it->action != ReplicationAction::Destroy && go != nullptr && go->collider->type != ColliderType::Laser)
 		{
 			packet << go->totalLife;
 			packet << go->totalKills;
