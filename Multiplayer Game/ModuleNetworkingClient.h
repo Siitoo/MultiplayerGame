@@ -83,5 +83,7 @@ private:
 
 	ReplicationManagerClient replicationClient;
 	DeliveryManager deliveryManager;
+
+	std::vector<std::string> leaderboard;
 };
 

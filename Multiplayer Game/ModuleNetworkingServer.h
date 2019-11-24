@@ -115,7 +115,7 @@ private:
 	
 	float replicationDeliveryIntervalSeconds = 0.1f;
 
-	
+	std::deque<std::string> leaderBoard;
 };
 
 

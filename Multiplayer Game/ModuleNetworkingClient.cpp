@@ -117,6 +117,14 @@ void ModuleNetworkingClient::onGui()
 				ImGui::Text(tlife.c_str());
 				ImGui::Text(tkills.c_str());
 			}
+
+			ImGui::Text("LEADERBOARD:");
+
+			for (int i = 0; i < leaderboard.size(); ++i)
+			{
+				ImGui::Text(leaderboard[i].c_str());
+			}
+
 		}
 	}
 	
@@ -150,6 +158,17 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		// TODO(jesus): Handle incoming messages from server
 		if (message == ServerMessage::Ping)
 		{
+			leaderboard.clear();
+			size_t size;
+			packet >> size;
+			std::string tmp; 
+			for (int i = 0; i < size; ++i)
+			{
+				packet >> tmp;
+
+				leaderboard.push_back(tmp);
+			}
+
 			//GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
 			//if (go != nullptr)
 			//{

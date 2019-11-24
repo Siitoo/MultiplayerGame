@@ -200,6 +200,35 @@ void ModuleNetworkingServer::onUpdate()
 {
 	if (state == ServerState::Listening)
 	{
+
+		static int min = 0;
+		static int max = 0;
+		leaderBoard.clear();
+		for (ClientProxy &clientProxy : clientProxies)
+		{
+			if (clientProxy.connected)
+			{
+				if (leaderBoard.empty())
+				{
+					leaderBoard.push_back(clientProxy.name);
+					min = max = clientProxy.gameObject->totalKills;
+				}
+				else
+				{
+					if (clientProxy.gameObject->totalKills > max)
+					{
+						leaderBoard.push_front(clientProxy.name);
+						max = clientProxy.gameObject->totalKills;
+					}
+					else
+					{
+						leaderBoard.push_back(clientProxy.name);
+						min = clientProxy.gameObject->totalKills;
+					}
+				}
+			}
+		}
+
 		//Ping Packet ServerToClient
 		if (secondsSinceLastPing > PING_INTERVAL_SECONDS)
 		{
@@ -211,6 +240,11 @@ void ModuleNetworkingServer::onUpdate()
 			{
 				if (clientProxy.connected)
 				{
+					packet << leaderBoard.size();
+					for (int i = 0; i < leaderBoard.size(); ++i)
+					{
+						packet << leaderBoard[i];
+					}
 					//packet << clientProxy.gameObject->totalLife;
 					//packet << clientProxy.gameObject->totalKills;
 					sendPacket(packet, clientProxy.address);
@@ -219,6 +253,9 @@ void ModuleNetworkingServer::onUpdate()
 		}
 		else
 			secondsSinceLastPing += Time.deltaTime;
+
+		
+
 
 		// Replication
 		for (ClientProxy &clientProxy : clientProxies)
