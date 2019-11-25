@@ -1,5 +1,6 @@
 #pragma once
 
+
 struct Behaviour
 {
 	GameObject *gameObject = nullptr;
@@ -20,7 +21,10 @@ struct Spaceship : public Behaviour
 {
 	void start() override
 	{
+		//srand(time(0));
 		gameObject->parent_tag = (uint32)(Random.next() * UINT_MAX);
+		gameObject->position.x = rand() %2000 + 1000;
+		gameObject->position.y = rand() % 2000 + 1000;
 	}
 
 	void onInput(const InputController &input, bool server) override
