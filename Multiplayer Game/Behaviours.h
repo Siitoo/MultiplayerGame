@@ -33,14 +33,16 @@ struct Spaceship : public Behaviour
 		{
 			const float rotateSpeed = 180.0f;
 			gameObject->angle += input.horizontalAxis * rotateSpeed * Time.deltaTime;
-			NetworkUpdate(gameObject);
+			if(server)
+				NetworkUpdate(gameObject);
 		}
 
 		if (input.actionDown == ButtonState::Pressed)
 		{
 			const float advanceSpeed = 200.0f;
 			gameObject->position += vec2FromDegrees(gameObject->angle) * advanceSpeed * Time.deltaTime;
-			NetworkUpdate(gameObject);
+			if(server)
+				NetworkUpdate(gameObject);
 		}
 
 		if (input.actionLeft == ButtonState::Press && server)
