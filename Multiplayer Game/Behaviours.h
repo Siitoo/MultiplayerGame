@@ -10,7 +10,7 @@ struct Behaviour
 	virtual void update() { }
 
 	virtual void onInput(const InputController &input, bool server = true) { }
-
+	virtual void onFakeInput(const InputController &input, float& angle, vec2& position) { }
 	virtual void onCollisionTriggered(Collider &c1, Collider &c2) { }
 
 	virtual void DoUpdate() { }
@@ -23,8 +23,8 @@ struct Spaceship : public Behaviour
 	{
 		//srand(time(0));
 		gameObject->parent_tag = (uint32)(Random.next() * UINT_MAX);
-		gameObject->position.x = rand() %2000 + 1000;
-		gameObject->position.y = rand() % 2000 + 1000;
+		//gameObject->position.x = rand() %2000 + 1000;
+		//gameObject->position.y = rand() % 2000 + 1000;
 	}
 
 	void onInput(const InputController &input, bool server) override
@@ -50,6 +50,24 @@ struct Spaceship : public Behaviour
 			GameObject * laser = App->modNetServer->spawnBullet(gameObject);
 			laser->parent_tag = gameObject->parent_tag;
 		}
+	}
+
+	void onFakeInput(const InputController &input, float& angle, vec2& position)
+	{
+		if (angle != 0)
+		{
+			const float rotateSpeed = 180.0f;
+			angle += input.horizontalAxis * rotateSpeed * Time.deltaTime;
+		}
+		
+
+		if(position.x != 0 || position.y != 0)
+		{
+			const float advanceSpeed = 200.0f;
+			position += vec2FromDegrees(gameObject->angle) * advanceSpeed * Time.deltaTime;
+
+		}
+
 	}
 
 	void onCollisionTriggered(Collider &c1, Collider &c2) override

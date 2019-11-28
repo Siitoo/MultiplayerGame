@@ -14,6 +14,9 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 		packet >> lastInput;
 	}
 
+	float angle = 0;
+	vec2 position = {0,0};
+
 	while (packet.RemainingByteCount() > 0)
 	{
 		ReplicationCommand replication_packet;
@@ -97,9 +100,19 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 			//Sito this is for laser and crash, well
 			if (tmp_go != nullptr)
 			{
-				packet >> tmp_go->position.x;
-				packet >> tmp_go->position.y;
-				packet >> tmp_go->angle;
+				if (tmp_go->networkId != network_id)
+				{
+					packet >> tmp_go->position.x;
+					packet >> tmp_go->position.y;
+					packet >> tmp_go->angle;
+				}
+				else
+				{
+					packet >> position.x;
+					packet >> position.y;
+					packet >> angle;
+
+				}
 			}
 			else
 			{
@@ -140,5 +153,5 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 	}
 
 	if(input)
-		App->modNetClient->SetLastInput(lastInput);
+		App->modNetClient->SetLastInput(lastInput, angle, position);
 }

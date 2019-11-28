@@ -143,7 +143,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			packet >> playerId;
 			packet >> networkId;
-
+			replicationClient.network_id = networkId;
 			LOG("ModuleNetworkingClient::onPacketReceived() - Welcome from server");
 			state = ClientState::Playing;
 		}
@@ -304,23 +304,31 @@ void ModuleNetworkingClient::onDisconnect()
 	
 }
 
-void ModuleNetworkingClient::SetLastInput(uint32 last)
+void ModuleNetworkingClient::SetLastInput(uint32 last,float angle, vec2 position)
 {
 	GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
 
-	for (uint32 i = last; i < inputDataBack; ++i)
+	if (angle != 0 || position.x != 0 || position.y != 0)
 	{
-		InputPacketData &inputPacketData = inputData[i % ArrayCount(inputData)];
-
-		if (go != nullptr)
+		for (uint32 i = last; i < inputDataBack; ++i)
 		{
-			InputController controller;
-			controller.horizontalAxis = inputPacketData.horizontalAxis;
-			controller.verticalAxis = inputPacketData.verticalAxis;
-			unpackInputControllerButtons(inputPacketData.buttonBits, controller);
-			go->behaviour->onInput(controller,false);
-		}
-	}
+			InputPacketData &inputPacketData = inputData[i % ArrayCount(inputData)];
 
+			if (go != nullptr)
+			{
+				InputController controller;
+				controller.horizontalAxis = inputPacketData.horizontalAxis;
+				controller.verticalAxis = inputPacketData.verticalAxis;
+				unpackInputControllerButtons(inputPacketData.buttonBits, controller);
+				go->behaviour->onFakeInput(controller, angle, position);
+			}
+		}
+
+		if (go->position.x != position.x || go->position.y != position.y)
+			go->position = position;
+		if (go->angle != angle)
+			go->angle = angle;
+
+	}
 	inputDataFront = last;
 }

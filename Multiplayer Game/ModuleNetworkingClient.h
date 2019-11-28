@@ -14,7 +14,7 @@ public:
 
 	void setPlayerInfo(const char *playerName, uint8 spaceshipType);
 
-	void SetLastInput(uint32 last);
+	void SetLastInput(uint32 last, float angle, vec2 position);
 
 private:
 

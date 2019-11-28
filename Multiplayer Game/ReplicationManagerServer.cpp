@@ -154,7 +154,8 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet, Delivery& deliv
 	packet << input;
 	if (input)
 	{
-		packet << App->modNetServer->GetLastInputSequenceNumberById(clientId);
+		uint32 n = App->modNetServer->GetLastInputSequenceNumberById(clientId);
+		packet << n;
 		input = false;
 	}
 

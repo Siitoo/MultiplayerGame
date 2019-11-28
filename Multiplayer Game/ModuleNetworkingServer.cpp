@@ -256,9 +256,6 @@ void ModuleNetworkingServer::onUpdate()
 		else
 			secondsSinceLastPing += Time.deltaTime;
 
-		
-
-
 		// Replication
 		for (ClientProxy &clientProxy : clientProxies)
 		{
