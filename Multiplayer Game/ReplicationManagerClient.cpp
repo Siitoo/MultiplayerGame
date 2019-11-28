@@ -5,6 +5,15 @@
 
 void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 {
+
+	bool input = false;
+	packet >> input;
+	uint32 lastInput = 0;
+	if (input)
+	{
+		packet >> lastInput;
+	}
+
 	while (packet.RemainingByteCount() > 0)
 	{
 		ReplicationCommand replication_packet;
@@ -127,13 +136,9 @@ void ReplicationManagerClient::Read(const InputMemoryStream &packet)
 			packet >> tmp_go->totalKills;
 		}
 
-		bool input = false;
-		packet >> input;
-		if (input)
-		{
-			uint32 lastInput = 0;
-			packet >> lastInput;
-			App->modNetClient->SetLastInput(lastInput);
-		}
+
 	}
+
+	if(input)
+		App->modNetClient->SetLastInput(lastInput);
 }

@@ -141,20 +141,23 @@ void ReplicationManagerServer::SuccesDestroy(uint32 networkId)
 
 void ReplicationManagerServer::InputNumber(uint32 networkId )
 {
-	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
-	{
-		if (it->networkId == networkId)
-		{
-			it->input = true;
-			break;
-		}
-	}
+	
+	input = true;
+		
 }
 
 void ReplicationManagerServer::Write(OutputMemoryStream &packet, Delivery& delivery)
 {
 	delivery.deliveryDelegate = new DeliveryReplicationCommand();
 	((DeliveryReplicationCommand*)delivery.deliveryDelegate)->clientId = clientId;
+
+	packet << input;
+	if (input)
+	{
+		packet << App->modNetServer->GetLastInputSequenceNumberById(clientId);
+		input = false;
+	}
+
 	for (std::vector<ReplicationCommand>::iterator it = commands.begin(); it != commands.end(); ++it)
 	{
 		packet << it->networkId;
@@ -200,12 +203,7 @@ void ReplicationManagerServer::Write(OutputMemoryStream &packet, Delivery& deliv
 			packet << go->totalKills;
 		}
 
-		packet << it->input;
-		if (it->input)
-		{
-			packet << App->modNetServer->GetLastInputSequenceNumberById(it->networkId);
-			it->input = false;
-		}
+		
 
 		((DeliveryReplicationCommand*)delivery.deliveryDelegate)->deliveryReplicationCommands.push_back(*it);
 
@@ -218,7 +216,7 @@ bool ReplicationManagerServer::HasCommands()
 {
 	for (int i = 0; i < commands.size(); ++i)
 	{
-		if (commands[i].action != ReplicationAction::None || commands[i].input)
+		if (commands[i].action != ReplicationAction::None || input)
 			return true;
 	}
 

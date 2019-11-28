@@ -258,11 +258,7 @@ void ModuleNetworkingClient::onUpdate()
 
 			if (go != nullptr)
 			{
-				InputController controller;
-				controller.horizontalAxis = Input.horizontalAxis;
-				controller.verticalAxis = Input.verticalAxis;
-				unpackInputControllerButtons(inputPacketData.buttonBits, controller);
-				go->behaviour->onInput(controller,false);
+				go->behaviour->onInput(Input,false);
 			}
 		}
 	}

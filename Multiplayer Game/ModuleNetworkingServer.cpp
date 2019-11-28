@@ -128,6 +128,8 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				welcomePacket << proxy->gameObject->networkId;
 				sendPacket(welcomePacket, fromAddress);
 
+				proxy->replication_server.SetClientId(proxy->clientId);
+
 				// Send all network objects to the new player
 				uint16 networkGameObjectsCount;
 				GameObject *networkGameObjects[MAX_NETWORK_OBJECTS];
@@ -424,7 +426,7 @@ GameObject * ModuleNetworkingServer::spawnPlayer(ClientProxy &clientProxy, uint8
 	// Create behaviour
 	clientProxy.gameObject->behaviour = new Spaceship;
 	clientProxy.gameObject->behaviour->gameObject = clientProxy.gameObject;
-
+	
 	// Assign a new network identity to the object
 	App->modLinkingContext->registerNetworkGameObject(clientProxy.gameObject);
 
@@ -531,7 +533,7 @@ void NetworkDestroy(GameObject * gameObject)
 	App->modNetServer->destroyNetworkObject(gameObject);
 }
 
-uint32 ModuleNetworkingServer::GetLastInputSequenceNumberById(uint32 networkId)
+uint32 ModuleNetworkingServer::GetLastInputSequenceNumberById(uint32 clientId)
 {
 	uint32 ret = 0;
 
@@ -539,14 +541,15 @@ uint32 ModuleNetworkingServer::GetLastInputSequenceNumberById(uint32 networkId)
 	{
 		if (clientProxies[i].connected)
 		{
-			if (clientProxies[i].gameObject->networkId == networkId)
+			if (clientProxies[i].clientId == clientId)
 			{
 				ret = clientProxies[i].nextExpectedInputSequenceNumber;
+				break;
 			}
 		}
 	}
 
-	return ret - 1;
+	return ret;
 }
 
 ReplicationManagerServer* ModuleNetworkingServer::GetReplicationServerForProxyId(uint32 id)

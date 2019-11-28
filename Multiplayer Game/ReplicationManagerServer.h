@@ -33,6 +33,7 @@ private:
 
 	std::vector<ReplicationCommand> commands;
 
+	bool input = false;
 	uint32 clientId;
 
 };
