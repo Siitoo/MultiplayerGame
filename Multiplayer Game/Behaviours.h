@@ -63,7 +63,7 @@ struct Spaceship : public Behaviour
 
 		if(position.x != 0 || position.y != 0)
 		{
-			if (Input.actionDown == Pressed)
+			if (input.actionDown == Pressed)
 			{
 				const float advanceSpeed = 200.0f;
 				position += vec2FromDegrees(gameObject->angle) * advanceSpeed * Time.deltaTime;
